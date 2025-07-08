@@ -62,8 +62,8 @@ import {
 } from '@mui/icons-material';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import { GridData } from '../types/amps-types';
-import { GRID_THEMES } from '../utils/constants';
 import { useGridState } from '../hooks/useGridState';
+import { useTheme } from '../contexts/ThemeContext';
 
 // Import AG Grid styles
 import 'ag-grid-community/styles/ag-grid.css';
@@ -93,18 +93,22 @@ ModuleRegistry.registerModules([
 interface DataGridProps {
   data: GridData[];
   isLoading?: boolean;
-  theme?: string;
   onClearData?: () => void;
 }
 
 export const DataGrid: React.FC<DataGridProps> = ({
   data,
   isLoading = false,
-  theme = GRID_THEMES.QUARTZ,
   onClearData
 }) => {
   const gridRef = useRef<AgGridReact>(null);
   const gridApiRef = useRef<GridApi | null>(null);
+  const { agGridThemeClass } = useTheme();
+
+  // Debug theme changes (development only)
+  React.useEffect(() => {
+    console.log('AG Grid theme class:', agGridThemeClass);
+  }, [agGridThemeClass]);
 
   // Debug data changes (development only)
   React.useEffect(() => {
@@ -795,7 +799,6 @@ export const DataGrid: React.FC<DataGridProps> = ({
 
           {/* Grid - Flexible Height */}
           <Box
-            className={`${theme}`}
             sx={{
               flex: 1, // Take up all available space
               width: '100%',
@@ -816,10 +819,10 @@ export const DataGrid: React.FC<DataGridProps> = ({
                   height: 400,
                   textAlign: 'center',
                   color: 'text.secondary',
-                  bgcolor: 'grey.50',
+                  bgcolor: 'background.paper',
                   borderRadius: 1,
                   border: '2px dashed',
-                  borderColor: 'grey.300'
+                  borderColor: 'divider'
                 }}
               >
                 <TableIcon sx={{ fontSize: 64, mb: 2, color: 'grey.400' }} />
@@ -835,27 +838,29 @@ export const DataGrid: React.FC<DataGridProps> = ({
                 </Typography>
               </Box>
             ) : (
-              <AgGridReact
-                ref={gridRef}
-                rowData={data}
-                columnDefs={columnDefs}
-                defaultColDef={defaultColDef}
-                gridOptions={gridOptions}
-                sideBar={sideBar}
-                onGridReady={onGridReady}
-                suppressMenuHide={false}
-                enableCellTextSelection={true}
-                ensureDomOrder={true}
-                enableCharts={true}
-                rowGroupPanelShow={gridState.enableGrouping ? 'always' : 'never'}
-                rowSelection="multiple"
-                overlayLoadingTemplate={
-                  '<span class="ag-overlay-loading-center">Connecting to AMPS server...</span>'
-                }
-                overlayNoRowsTemplate={
-                  '<span class="ag-overlay-no-rows-center">No AMPS data received. Check server connection and topic configuration.</span>'
-                }
-              />
+              <div className={agGridThemeClass} style={{ height: '100%', width: '100%' }}>
+                <AgGridReact
+                  ref={gridRef}
+                  rowData={data}
+                  columnDefs={columnDefs}
+                  defaultColDef={defaultColDef}
+                  gridOptions={gridOptions}
+                  sideBar={sideBar}
+                  onGridReady={onGridReady}
+                  suppressMenuHide={false}
+                  enableCellTextSelection={true}
+                  ensureDomOrder={true}
+                  enableCharts={true}
+                  rowGroupPanelShow={gridState.enableGrouping ? 'always' : 'never'}
+                  rowSelection="multiple"
+                  overlayLoadingTemplate={
+                    '<span class="ag-overlay-loading-center">Connecting to AMPS server...</span>'
+                  }
+                  overlayNoRowsTemplate={
+                    '<span class="ag-overlay-no-rows-center">No AMPS data received. Check server connection and topic configuration.</span>'
+                  }
+                />
+              </div>
             )}
           </Box>
 

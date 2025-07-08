@@ -1,5 +1,4 @@
 import { useState, useCallback, useEffect } from 'react';
-import { ThemeProvider, CssBaseline } from '@mui/material';
 import {
   Box,
   Typography,
@@ -8,9 +7,15 @@ import {
   Toolbar,
   Backdrop,
   CircularProgress,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
+import {
+  LightMode as LightModeIcon,
+  DarkMode as DarkModeIcon,
+} from '@mui/icons-material';
 
-import { muiTheme } from './theme/muiTheme';
+import { ThemeProvider, useTheme } from './contexts/ThemeContext';
 import { AMPSServer, AMPSCommand, AMPSQueryOptions } from './config/amps-config';
 import { useAMPS } from './hooks/useAMPS';
 import { useTopics } from './hooks/useTopics';
@@ -20,7 +25,8 @@ import { ErrorBoundary } from './components/ErrorBoundary';
 import { NotificationToast, useNotifications } from './components/NotificationToast';
 import './App.css';
 
-function App() {
+function AppContent() {
+  const { isDarkMode, toggleTheme } = useTheme();
   const [selectedServer, setSelectedServer] = useState<AMPSServer | null>(null);
   const [selectedTopic, setSelectedTopic] = useState<string>('');
   const [selectedCommand, setSelectedCommand] = useState<AMPSCommand | ''>(AMPSCommand.QUERY); // Default to Query (SOW)
@@ -186,8 +192,6 @@ function App() {
   }, [selectedTopic, clearData, addNotification]);
 
   return (
-    <ThemeProvider theme={muiTheme}>
-      <CssBaseline />
       <ErrorBoundary>
         <Box sx={{ flexGrow: 1, minHeight: '100vh', backgroundColor: 'background.default' }}>
           {/* Bloomberg Terminal Style App Bar */}
@@ -206,7 +210,7 @@ function App() {
                   },
                 }}
               />
-              <Box>
+              <Box sx={{ flexGrow: 1 }}>
                 <Typography variant="h5" component="h1" fontWeight={600}>
                   AMPS Browser
                 </Typography>
@@ -214,6 +218,26 @@ function App() {
                   ADVANCED MESSAGE PROCESSING SYSTEM - REAL-TIME DATA TERMINAL
                 </Typography>
               </Box>
+
+              {/* Theme Toggle Button */}
+              <Tooltip title={isDarkMode ? "Switch to Light Mode" : "Switch to Dark Mode"}>
+                <IconButton
+                  onClick={toggleTheme}
+                  color="inherit"
+                  size="large"
+                  sx={{
+                    ml: 2,
+                    border: 1,
+                    borderColor: 'rgba(255, 255, 255, 0.3)',
+                    '&:hover': {
+                      backgroundColor: 'rgba(255, 255, 255, 0.1)',
+                      borderColor: 'rgba(255, 255, 255, 0.5)',
+                    }
+                  }}
+                >
+                  {isDarkMode ? <LightModeIcon /> : <DarkModeIcon />}
+                </IconButton>
+              </Tooltip>
             </Toolbar>
           </AppBar>
 
@@ -290,6 +314,13 @@ function App() {
           </Backdrop>
         </Box>
       </ErrorBoundary>
+  );
+}
+
+function App() {
+  return (
+    <ThemeProvider>
+      <AppContent />
     </ThemeProvider>
   );
 }

@@ -125,7 +125,7 @@ export const CompactQueryBar: React.FC<CompactQueryBarProps> = ({
       elevation={3}
       sx={{
         mb: 3,
-        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        bgcolor: 'background.paper',
         border: '1px solid',
         borderColor: 'divider'
       }}
