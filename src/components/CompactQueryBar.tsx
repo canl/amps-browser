@@ -131,25 +131,23 @@ export const CompactQueryBar: React.FC<CompactQueryBarProps> = ({
       }}
     >
       <Box sx={{ p: 3 }}>
-        {/* Row 1: Connection & Server Management */}
-        <ServerConnection
-          selectedServer={selectedServer}
-          onServerSelect={onServerSelect}
-          connectionState={connectionState}
-          onConnect={onConnect}
-          onDisconnect={onDisconnect}
-        />
-
-        <Divider sx={{ my: 2 }} />
-
-        {/* Combined: Topic Selection, Command Configuration & Advanced Query Options */}
+        {/* Combined: Connection, Server Management, Topic Selection & Command Configuration */}
         <SectionToolbar
-          title="Topic Selection & Command Configuration"
+          title="AMPS Server Connection & Query Configuration"
           icon={<TopicIcon fontSize="small" />}
           defaultExpanded={true}
         >
           <Stack spacing={3}>
-            {/* Row 1: Topic Selection & Command Configuration */}
+            {/* Row 1: Connection & Server Management */}
+            <ServerConnection
+              selectedServer={selectedServer}
+              onServerSelect={onServerSelect}
+              connectionState={connectionState}
+              onConnect={onConnect}
+              onDisconnect={onDisconnect}
+            />
+
+            {/* Row 2: Topic Selection & Command Configuration */}
             <Stack direction={{ xs: 'column', lg: 'row' }} spacing={2} alignItems="stretch">
               {/* Topic Selection */}
               <TopicSelection
@@ -176,7 +174,7 @@ export const CompactQueryBar: React.FC<CompactQueryBarProps> = ({
               />
             </Stack>
 
-            {/* Row 2: Advanced Query Options (Collapsible) */}
+            {/* Row 3: Advanced Query Options (Collapsible) */}
             <Collapse in={showAdvanced}>
               <Box sx={{ pt: 2, borderTop: '1px solid', borderColor: 'divider' }}>
                 <Typography

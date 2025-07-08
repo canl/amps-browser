@@ -2,7 +2,6 @@ import { useState, useCallback, useEffect } from 'react';
 import { ThemeProvider, CssBaseline } from '@mui/material';
 import {
   Box,
-  Container,
   Typography,
   Stack,
   AppBar,
@@ -10,9 +9,7 @@ import {
   Backdrop,
   CircularProgress,
 } from '@mui/material';
-import {
-  Memory as AMPSIcon,
-} from '@mui/icons-material';
+
 import { muiTheme } from './theme/muiTheme';
 import { AMPSServer, AMPSCommand, AMPSQueryOptions } from './config/amps-config';
 import { useAMPS } from './hooks/useAMPS';
@@ -196,7 +193,19 @@ function App() {
           {/* Bloomberg Terminal Style App Bar */}
           <AppBar position="static" elevation={0}>
             <Toolbar>
-              <AMPSIcon sx={{ mr: 2, color: '#FFD700' }} />
+              <Box
+                component="img"
+                src="/favicon.ico"
+                alt="AMPS Browser"
+                sx={{
+                  width: 30,
+                  height: 30,
+                  mr: 2,
+                  '&:hover': {
+                    opacity: 0.8,
+                  },
+                }}
+              />
               <Box>
                 <Typography variant="h5" component="h1" fontWeight={600}>
                   AMPS Browser
@@ -208,10 +217,18 @@ function App() {
             </Toolbar>
           </AppBar>
 
-          {/* Main Content */}
-          <Container maxWidth="xl" sx={{ py: 3 }}>
-            <Stack spacing={3}>
-              {/* Compact Query Bar */}
+          {/* Main Content - Full Width Layout */}
+          <Box
+            sx={{
+              width: '100%',
+              height: 'calc(100vh - 64px)', // Full height minus AppBar
+              display: 'flex',
+              flexDirection: 'column',
+              overflow: 'hidden'
+            }}
+          >
+            {/* Compact Query Bar - Fixed Height */}
+            <Box sx={{ flexShrink: 0, p: 2 }}>
               <CompactQueryBar
                 selectedServer={selectedServer}
                 onServerSelect={setSelectedServer}
@@ -232,15 +249,26 @@ function App() {
                 onNotification={addNotification}
                 onClearFieldErrors={clearFieldErrors}
               />
+            </Box>
 
-              {/* Data Grid - Now takes up most of the screen */}
+            {/* Data Grid - Flexible Height */}
+            <Box
+              sx={{
+                flex: 1,
+                px: 2,
+                pb: 2,
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+            >
               <DataGrid
                 data={gridData}
                 isLoading={executionState.isExecuting}
                 onClearData={clearData}
               />
-            </Stack>
-          </Container>
+            </Box>
+          </Box>
 
           {/* Notifications */}
           <NotificationToast

@@ -59,7 +59,6 @@ import {
   Download as DownloadIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
-  Plagiarism as PlagiarismIcon,
 } from '@mui/icons-material';
 import DataObjectIcon from '@mui/icons-material/DataObject';
 import { GridData } from '../types/amps-types';
@@ -97,8 +96,6 @@ interface DataGridProps {
   theme?: string;
   onClearData?: () => void;
 }
-
-
 
 export const DataGrid: React.FC<DataGridProps> = ({
   data,
@@ -141,6 +138,19 @@ export const DataGrid: React.FC<DataGridProps> = ({
     setSelectedRowData(null);
   }, []);
 
+  // Function to format JSON with syntax highlighting
+  const formatJsonWithHighlighting = useCallback((obj: any) => {
+    const jsonString = JSON.stringify(obj, null, 2);
+
+    // Apply syntax highlighting using regex
+    return jsonString
+      .replace(/(".*?")(\s*:)/g, '<span class="json-key">$1</span>$2') // Keys
+      .replace(/:\s*(".*?")/g, ': <span class="json-string">$1</span>') // String values
+      .replace(/:\s*(\d+\.?\d*)/g, ': <span class="json-number">$1</span>') // Number values
+      .replace(/:\s*(true|false)/g, ': <span class="json-boolean">$1</span>') // Boolean values
+      .replace(/:\s*(null)/g, ': <span class="json-null">$1</span>'); // Null values
+  }, []);
+
   // View Button Cell Renderer Component
   const ViewButtonRenderer = useCallback((props: any) => {
     return (
@@ -152,6 +162,77 @@ export const DataGrid: React.FC<DataGridProps> = ({
       </Button>
     );
   }, [handleViewRawData]);
+
+  // Nested Object Cell Renderer Component
+  const NestedObjectRenderer = useCallback((props: any) => {
+    if (props.value === null || props.value === undefined) {
+      return (
+        <Box component="span" sx={{ fontStyle: 'italic', opacity: 0.6 }}>
+          null
+        </Box>
+      );
+    }
+
+    try {
+      const jsonString = JSON.stringify(props.value);
+
+      // For arrays, show a more readable format
+      if (Array.isArray(props.value)) {
+        const arrayLength = props.value.length;
+        const preview = arrayLength > 0 ? JSON.stringify(props.value[0]) : '{}';
+        const truncatedPreview = preview.length > 50 ? preview.substring(0, 50) + '...' : preview;
+
+        return (
+          <Box
+            component="span"
+            sx={{
+              fontFamily: 'monospace',
+              fontSize: '0.875rem'
+            }}
+            title={jsonString}
+          >
+            [{arrayLength} items] {truncatedPreview}
+          </Box>
+        );
+      }
+
+      // For objects, show a truncated version
+      const truncated = jsonString.length > 100 ? jsonString.substring(0, 100) + '...' : jsonString;
+      return (
+        <Box
+          component="span"
+          sx={{
+            fontFamily: 'monospace',
+            fontSize: '0.875rem'
+          }}
+          title={jsonString}
+        >
+          {truncated}
+        </Box>
+      );
+    } catch (error) {
+      return (
+        <Box component="span" sx={{ fontStyle: 'italic', opacity: 0.6 }}>
+          [Complex Object]
+        </Box>
+      );
+    }
+  }, []);
+
+  // Boolean Cell Renderer Component
+  const BooleanRenderer = useCallback((props: any) => {
+    return (
+      <Box
+        component="span"
+        sx={{
+          color: props.value ? 'success.main' : 'error.main',
+          fontWeight: 500
+        }}
+      >
+        {props.value ? 'True' : 'False'}
+      </Box>
+    );
+  }, []);
 
   // Toolbar collapsed by default to optimize screen space
   const [toolbarExpanded, setToolbarExpanded] = useState(false);
@@ -215,7 +296,6 @@ export const DataGrid: React.FC<DataGridProps> = ({
         const sampleValue = data.find(row => row[key] !== undefined)?.[key];
         const valueType = typeof sampleValue;
         const keyLower = key.toLowerCase();
-
         const colDef: ColDef = {
           field: key,
           headerName: formatHeaderName(key),
@@ -230,7 +310,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
           menuTabs: ['filterMenuTab', 'generalMenuTab', 'columnsMenuTab']
         };
 
-        // Configure column based on data type and AMPS-specific formatting
+        // Configure column based on data type
         if (valueType === 'number') {
           colDef.type = 'numericColumn';
           colDef.filter = 'agNumberColumnFilter';
@@ -258,24 +338,6 @@ export const DataGrid: React.FC<DataGridProps> = ({
               return params.value;
             };
           }
-          // Volume/Quantity formatting
-          else if (keyLower.includes('volume') || keyLower.includes('quantity') || keyLower.includes('size')) {
-            colDef.cellRenderer = (params: any) => {
-              if (typeof params.value === 'number') {
-                return params.value.toLocaleString('en-US');
-              }
-              return params.value;
-            };
-          }
-        }
-        else if (valueType === 'boolean') {
-          colDef.cellRenderer = (params: any) => {
-            return params.value ?
-              '<span style="color: #4caf50;">✓</span>' :
-              '<span style="color: #f44336;">✗</span>';
-          };
-          colDef.filter = 'agSetColumnFilter';
-          colDef.enableRowGroup = true;
         }
         else if (keyLower.includes('time') || keyLower.includes('date') || keyLower === 'timestamp') {
           colDef.filter = 'agDateColumnFilter';
@@ -302,41 +364,17 @@ export const DataGrid: React.FC<DataGridProps> = ({
             return '';
           };
         }
-        // Status and side fields with color coding
-        else if (keyLower === 'status' || keyLower === 'side' || keyLower.includes('type')) {
+        // Handle objects and arrays (data-agnostic)
+        else if (valueType === 'object' && sampleValue !== null) {
+          colDef.filter = 'agTextColumnFilter';
+          colDef.enableRowGroup = false;
+          colDef.cellRenderer = NestedObjectRenderer;
+        }
+        // Handle booleans (data-agnostic)
+        else if (valueType === 'boolean') {
           colDef.filter = 'agSetColumnFilter';
           colDef.enableRowGroup = true;
-          colDef.cellRenderer = (params: any) => {
-            if (!params.value) return '';
-
-            let color = '#666';
-            const value = params.value.toString().toUpperCase();
-
-            // Status color coding
-            if (keyLower === 'status') {
-              switch (value) {
-                case 'FILLED': case 'ACTIVE': case 'NEW': color = '#4caf50'; break;
-                case 'CANCELLED': case 'REJECTED': case 'INACTIVE': color = '#f44336'; break;
-                case 'PENDING': case 'PARTIALLY_FILLED': color = '#ff9800'; break;
-              }
-            }
-            // Side color coding
-            else if (keyLower === 'side') {
-              color = value === 'BUY' ? '#4caf50' : '#f44336';
-            }
-
-            return `<span style="color: ${color}; font-weight: 500;">${params.value}</span>`;
-          };
-        }
-        // ID fields - just use default text rendering
-        else if (keyLower.includes('id') || keyLower === 'symbol') {
-          colDef.filter = 'agTextColumnFilter';
-          colDef.enableRowGroup = true;
-          // No custom renderer - just display the plain value
-        }
-        else {
-          colDef.filter = 'agTextColumnFilter';
-          colDef.enableRowGroup = true;
+          colDef.cellRenderer = BooleanRenderer;
         }
 
       return colDef;
@@ -361,7 +399,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
     };
 
     return [...dataColumns, viewColumn];
-  }, [data, handleViewRawData, ViewButtonRenderer]);
+  }, [data, handleViewRawData, ViewButtonRenderer, NestedObjectRenderer, BooleanRenderer]);
 
   // Default column definition with Enterprise features
   const defaultColDef = useMemo<ColDef>(() => ({
@@ -521,9 +559,30 @@ export const DataGrid: React.FC<DataGridProps> = ({
 
   return (
     <>
-    <Card elevation={2}>
-      <CardContent>
-        <Stack spacing={3}>
+    <Card
+      elevation={2}
+      sx={{
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column'
+      }}
+    >
+      <CardContent
+        sx={{
+          height: '100%',
+          display: 'flex',
+          flexDirection: 'column',
+          '&:last-child': { pb: 2 } // Override default CardContent padding
+        }}
+      >
+        <Stack
+          spacing={3}
+          sx={{
+            height: '100%',
+            display: 'flex',
+            flexDirection: 'column'
+          }}
+        >
           {/* Header with AMPS Message Info */}
           <Box display="flex" alignItems="center" justifyContent="space-between">
             <Box display="flex" alignItems="center" gap={2} flexWrap="wrap">
@@ -734,16 +793,17 @@ export const DataGrid: React.FC<DataGridProps> = ({
             </Collapse>
           </Paper>
 
-          {/* Grid */}
+          {/* Grid - Flexible Height */}
           <Box
             className={`${theme}`}
             sx={{
-              height: toolbarExpanded ? 500 : 600, // More space when toolbar is collapsed
+              flex: 1, // Take up all available space
               width: '100%',
               border: 1,
               borderColor: 'divider',
               borderRadius: 1,
               overflow: 'hidden',
+              minHeight: 400, // Minimum height for usability
             }}
           >
             {data.length === 0 && !isLoading ? (
@@ -834,7 +894,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
           gap: 1
         }}
       >
-        <PlagiarismIcon />
+        <DataObjectIcon />
         Raw JSON Data
       </DialogTitle>
       <DialogContent
@@ -861,24 +921,29 @@ export const DataGrid: React.FC<DataGridProps> = ({
             wordBreak: 'break-word',
             color: '#ffffff',
             '& .json-key': {
-              color: '#FFD700',
+              color: '#FFD700 !important',
+              fontWeight: 'bold',
             },
             '& .json-string': {
-              color: '#00FFFF',
+              color: '#00FFFF !important',
             },
             '& .json-number': {
-              color: '#00FF00',
+              color: '#00FF00 !important',
+              fontWeight: 'bold',
             },
             '& .json-boolean': {
-              color: '#FFA500',
+              color: '#FFA500 !important',
+              fontWeight: 'bold',
             },
             '& .json-null': {
-              color: '#FF0000',
+              color: '#FF0000 !important',
+              fontWeight: 'bold',
             },
           }}
-        >
-          {selectedRowData ? JSON.stringify(selectedRowData, null, 2) : ''}
-        </Box>
+          dangerouslySetInnerHTML={{
+            __html: selectedRowData ? formatJsonWithHighlighting(selectedRowData) : ''
+          }}
+        />
       </DialogContent>
       <DialogActions
         sx={{

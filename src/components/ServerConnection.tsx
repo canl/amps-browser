@@ -5,15 +5,10 @@ import {
   Button,
   ButtonGroup,
 } from '@mui/material';
-import {
-  CloudQueue as ServerIcon,
-  Refresh as RefreshIcon,
-} from '@mui/icons-material';
 import { AMPSServer, AMPS_SERVERS } from '../config/amps-config';
 import { AMPSConnectionState } from '../types/amps-types';
 import { SelectField } from './common/FormField';
 import { ConnectionStatus } from './common/StatusDisplay';
-import { SectionToolbar } from './common/Toolbar';
 
 export interface ServerConnectionProps {
   selectedServer: AMPSServer | null;
@@ -57,11 +52,6 @@ export const ServerConnection: React.FC<ServerConnectionProps> = ({
   }));
 
   return (
-    <SectionToolbar
-      title="Connection & Server Management"
-      icon={<ServerIcon fontSize="small" />}
-      defaultExpanded={true}
-    >
       <Stack direction={{ xs: 'column', md: 'row' }} spacing={2} alignItems="center">
         {/* Server Selection */}
         <Box sx={{ minWidth: 250 }}>
@@ -110,7 +100,7 @@ export const ServerConnection: React.FC<ServerConnectionProps> = ({
           <Button
             variant="text"
             size="small"
-            href={`http://${selectedServer.host}:${selectedServer.adminPort}/amps/admin`}
+            href={`http://${selectedServer.host}:${selectedServer.adminPort}`}
             target="_blank"
             rel="noopener noreferrer"
             sx={{ textTransform: 'none' }}
@@ -119,6 +109,5 @@ export const ServerConnection: React.FC<ServerConnectionProps> = ({
           </Button>
         )}
       </Stack>
-    </SectionToolbar>
   );
 };
