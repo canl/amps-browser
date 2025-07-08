@@ -96,13 +96,15 @@ function App() {
   const handleDisconnect = useCallback(async () => {
     try {
       await disconnect();
+      // Clear all state and data when disconnecting
       setSelectedTopic('');
       setSelectedCommand('');
       setQueryOptions({});
+      clearData(); // Clear data grid to avoid showing stale data
       addNotification({
         type: 'info',
         title: 'Disconnected',
-        message: 'Disconnected from AMPS server'
+        message: 'Disconnected from AMPS server. Data grid cleared.'
       });
     } catch (error) {
       console.error('Disconnect failed:', error);
@@ -112,7 +114,7 @@ function App() {
         message: error instanceof Error ? error.message : 'Failed to disconnect from server'
       });
     }
-  }, [disconnect, addNotification]);
+  }, [disconnect, clearData, addNotification]);
 
   const handleExecute = useCallback(async () => {
     if (selectedCommand && selectedTopic) {
@@ -152,21 +154,55 @@ function App() {
     }
   }, [stopExecution, addNotification]);
 
+  // Handle command selection with data grid clearing
+  const handleCommandSelect = useCallback((command: AMPSCommand | '') => {
+    // Clear data grid when switching command types to avoid showing stale data
+    clearData();
+    setSelectedCommand(command);
+
+    // Add notification for user feedback
+    if (command) {
+      addNotification({
+        type: 'info',
+        title: 'Command Changed',
+        message: `Switched to ${command} command. Data grid cleared.`
+      });
+    }
+  }, [clearData, addNotification]);
+
+  // Handle topic selection with data grid clearing
+  const handleTopicSelect = useCallback((topic: string) => {
+    // Clear data grid when switching topics to avoid showing stale data
+    if (topic !== selectedTopic) {
+      clearData();
+      setSelectedTopic(topic);
+
+      // Add notification for user feedback
+      if (topic) {
+        addNotification({
+          type: 'info',
+          title: 'Topic Changed',
+          message: `Switched to topic ${topic}. Data grid cleared.`
+        });
+      }
+    }
+  }, [selectedTopic, clearData, addNotification]);
+
   return (
     <ThemeProvider theme={muiTheme}>
       <CssBaseline />
       <ErrorBoundary>
         <Box sx={{ flexGrow: 1, minHeight: '100vh', backgroundColor: 'background.default' }}>
-          {/* App Bar */}
-          <AppBar position="static" elevation={0} sx={{ background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)' }}>
+          {/* Bloomberg Terminal Style App Bar */}
+          <AppBar position="static" elevation={0}>
             <Toolbar>
-              <AMPSIcon sx={{ mr: 2 }} />
+              <AMPSIcon sx={{ mr: 2, color: '#FFD700' }} />
               <Box>
                 <Typography variant="h5" component="h1" fontWeight={600}>
                   AMPS Browser
                 </Typography>
-                <Typography variant="body2" sx={{ opacity: 0.9 }}>
-                  Advanced Message Processing System - Browser Interface
+                <Typography variant="body2" sx={{ opacity: 0.8, fontSize: '0.6875rem', letterSpacing: '0.1em' }}>
+                  ADVANCED MESSAGE PROCESSING SYSTEM - REAL-TIME DATA TERMINAL
                 </Typography>
               </Box>
             </Toolbar>
@@ -183,10 +219,10 @@ function App() {
                 onConnect={handleConnect}
                 onDisconnect={handleDisconnect}
                 selectedTopic={selectedTopic}
-                onTopicSelect={setSelectedTopic}
+                onTopicSelect={handleTopicSelect}
                 availableTopics={availableTopics}
                 selectedCommand={selectedCommand}
-                onCommandSelect={setSelectedCommand}
+                onCommandSelect={handleCommandSelect}
                 queryOptions={queryOptions}
                 onOptionsChange={setQueryOptions}
                 executionState={executionState}

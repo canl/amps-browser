@@ -41,6 +41,10 @@ import {
   Paper,
   Divider,
   Collapse,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
 } from '@mui/material';
 import {
   GetApp as ExportIcon,
@@ -55,7 +59,9 @@ import {
   Download as DownloadIcon,
   ExpandMore as ExpandMoreIcon,
   ExpandLess as ExpandLessIcon,
+  Plagiarism as PlagiarismIcon,
 } from '@mui/icons-material';
+import DataObjectIcon from '@mui/icons-material/DataObject';
 import { GridData } from '../types/amps-types';
 import { GRID_THEMES } from '../utils/constants';
 import { useGridState } from '../hooks/useGridState';
@@ -119,6 +125,34 @@ export const DataGrid: React.FC<DataGridProps> = ({
     enableFiltering: true
   });
 
+  // Modal state for viewing raw JSON data
+  const [viewModalOpen, setViewModalOpen] = useState(false);
+  const [selectedRowData, setSelectedRowData] = useState<GridData | null>(null);
+
+  // Handler for viewing raw JSON data
+  const handleViewRawData = useCallback((rowData: GridData) => {
+    setSelectedRowData(rowData);
+    setViewModalOpen(true);
+  }, []);
+
+  // Handler for closing the view modal
+  const handleCloseViewModal = useCallback(() => {
+    setViewModalOpen(false);
+    setSelectedRowData(null);
+  }, []);
+
+  // View Button Cell Renderer Component
+  const ViewButtonRenderer = useCallback((props: any) => {
+    return (
+      <Button
+        size="small"
+        onClick={() => handleViewRawData(props.data)}
+      >
+        <DataObjectIcon />
+      </Button>
+    );
+  }, [handleViewRawData]);
+
   // Toolbar collapsed by default to optimize screen space
   const [toolbarExpanded, setToolbarExpanded] = useState(false);
 
@@ -175,7 +209,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
     };
 
     // Create column definitions with AMPS-specific formatting
-    return Array.from(allKeys)
+    const dataColumns = Array.from(allKeys)
       .sort((a, b) => getColumnPriority(a) - getColumnPriority(b))
       .map(key => {
         const sampleValue = data.find(row => row[key] !== undefined)?.[key];
@@ -307,7 +341,27 @@ export const DataGrid: React.FC<DataGridProps> = ({
 
       return colDef;
     });
-  }, [data]);
+
+    // Add View column as the last column for inspecting raw JSON data
+    const viewColumn: ColDef = {
+      headerName: 'View',
+      field: '__view__',
+      width: 80,
+      minWidth: 80,
+      maxWidth: 80,
+      resizable: false,
+      sortable: false,
+      filter: false,
+      floatingFilter: false,
+      enableRowGroup: false,
+      enablePivot: false,
+      enableValue: false,
+      pinned: 'right',
+      cellRenderer: ViewButtonRenderer
+    };
+
+    return [...dataColumns, viewColumn];
+  }, [data, handleViewRawData, ViewButtonRenderer]);
 
   // Default column definition with Enterprise features
   const defaultColDef = useMemo<ColDef>(() => ({
@@ -466,6 +520,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
   const handlePageSizeChange = gridActions.setPageSize;
 
   return (
+    <>
     <Card elevation={2}>
       <CardContent>
         <Stack spacing={3}>
@@ -747,5 +802,132 @@ export const DataGrid: React.FC<DataGridProps> = ({
         </Stack>
       </CardContent>
     </Card>
+
+    {/* Raw JSON Data View Modal */}
+    <Dialog
+      open={viewModalOpen}
+      onClose={handleCloseViewModal}
+      maxWidth="md"
+      fullWidth
+      slotProps={{
+        paper: {
+          sx: {
+            backgroundColor: '#1a1a1a',
+            border: '1px solid #FFD700',
+            borderRadius: 2,
+          }
+        }
+      }}
+    >
+      <DialogTitle
+        sx={{
+          backgroundColor: '#000000',
+          color: '#FFD700',
+          fontFamily: '"Courier New", "Monaco", "Consolas", monospace',
+          fontSize: '1rem',
+          fontWeight: 700,
+          textTransform: 'uppercase',
+          letterSpacing: '0.1em',
+          borderBottom: '1px solid #FFD700',
+          display: 'flex',
+          alignItems: 'center',
+          gap: 1
+        }}
+      >
+        <PlagiarismIcon />
+        Raw JSON Data
+      </DialogTitle>
+      <DialogContent
+        sx={{
+          backgroundColor: '#1a1a1a',
+          color: '#ffffff',
+          padding: 2,
+        }}
+      >
+        <Box
+          component="pre"
+          sx={{
+            fontFamily: '"Courier New", "Monaco", "Consolas", monospace',
+            fontSize: '0.875rem',
+            lineHeight: 1.4,
+            margin: 0,
+            padding: 2,
+            backgroundColor: '#000000',
+            border: '1px solid #404040',
+            borderRadius: 1,
+            overflow: 'auto',
+            maxHeight: '60vh',
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            color: '#ffffff',
+            '& .json-key': {
+              color: '#FFD700',
+            },
+            '& .json-string': {
+              color: '#00FFFF',
+            },
+            '& .json-number': {
+              color: '#00FF00',
+            },
+            '& .json-boolean': {
+              color: '#FFA500',
+            },
+            '& .json-null': {
+              color: '#FF0000',
+            },
+          }}
+        >
+          {selectedRowData ? JSON.stringify(selectedRowData, null, 2) : ''}
+        </Box>
+      </DialogContent>
+      <DialogActions
+        sx={{
+          backgroundColor: '#000000',
+          borderTop: '1px solid #FFD700',
+          padding: 2,
+        }}
+      >
+        <Button
+          onClick={handleCloseViewModal}
+          variant="outlined"
+          sx={{
+            color: '#FFD700',
+            borderColor: '#FFD700',
+            fontFamily: '"Courier New", "Monaco", "Consolas", monospace',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            '&:hover': {
+              backgroundColor: '#333300',
+              borderColor: '#FFD700',
+            },
+          }}
+        >
+          Close
+        </Button>
+        <Button
+          onClick={() => {
+            if (selectedRowData) {
+              navigator.clipboard.writeText(JSON.stringify(selectedRowData, null, 2));
+              // Could add a toast notification here
+            }
+          }}
+          variant="contained"
+          sx={{
+            backgroundColor: '#2d2d2d',
+            color: '#FFD700',
+            border: '1px solid #FFD700',
+            fontFamily: '"Courier New", "Monaco", "Consolas", monospace',
+            textTransform: 'uppercase',
+            letterSpacing: '0.1em',
+            '&:hover': {
+              backgroundColor: '#333300',
+            },
+          }}
+        >
+          Copy JSON
+        </Button>
+      </DialogActions>
+    </Dialog>
+    </>
   );
 };
