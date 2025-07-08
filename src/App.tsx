@@ -199,7 +199,7 @@ function AppContent() {
             <Toolbar>
               <Box
                 component="img"
-                src="/favicon.ico"
+                src={isDarkMode ? "/amps_dark.png" : "/amps_light.png"}
                 alt="AMPS Browser"
                 sx={{
                   width: 30,
