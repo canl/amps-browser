@@ -30,9 +30,37 @@ export const TopicSelection: React.FC<TopicSelectionProps> = ({
   executionState,
   onNotification,
 }) => {
-  const topicOptions = availableTopics.map(topic => ({
+  // Define message type order and colors
+  const messageTypeOrder = ['json', 'nvfix', 'xml', 'bson', 'fix'];
+  const messageTypeColors = {
+    json: 'success',
+    nvfix: 'primary',
+    xml: 'warning',
+    bson: 'info',
+    fix: 'secondary'
+  } as const;
+
+  // Sort topics by message type order, then by topic name
+  const sortedTopics = [...availableTopics].sort((a, b) => {
+    const aTypeIndex = messageTypeOrder.indexOf(a.messageType.toLowerCase());
+    const bTypeIndex = messageTypeOrder.indexOf(b.messageType.toLowerCase());
+
+    // If message types are different, sort by type order
+    if (aTypeIndex !== bTypeIndex) {
+      // Put unknown types at the end
+      if (aTypeIndex === -1) return 1;
+      if (bTypeIndex === -1) return -1;
+      return aTypeIndex - bTypeIndex;
+    }
+
+    // If same message type, sort by topic name
+    return a.name.localeCompare(b.name);
+  });
+
+  const topicOptions = sortedTopics.map(topic => ({
     value: topic.name,
     label: topic.name,
+    messageType: topic.messageType,
     description: `${topic.messageType} • Key: ${topic.key || 'No key'} • File: ${topic.fileName || 'N/A'}`,
   }));
 
@@ -53,6 +81,11 @@ export const TopicSelection: React.FC<TopicSelectionProps> = ({
   const isDisabled = !connectionState.isConnected || executionState.isExecuting;
   const isLocked = executionState.isExecuting;
 
+  const getMessageTypeColor = (messageType: string) => {
+    const lowerType = messageType.toLowerCase();
+    return messageTypeColors[lowerType as keyof typeof messageTypeColors] || 'default';
+  };
+
   const renderTopicOption = (props: any, option: any) => (
     <Box component="li" {...props} sx={{ py: 1.5 }}>
       <Box sx={{ display: 'flex', alignItems: 'center', width: '100%', gap: 2 }}>
@@ -63,9 +96,9 @@ export const TopicSelection: React.FC<TopicSelectionProps> = ({
           Key: {option.description.split(' • ')[1]?.replace('Key: ', '') || 'No key defined'}
         </Typography>
         <Chip
-          label={option.description.split(' • ')[0].toUpperCase()}
+          label={option.messageType.toUpperCase()}
           size="small"
-          color="primary"
+          color={getMessageTypeColor(option.messageType)}
           variant="outlined"
         />
       </Box>

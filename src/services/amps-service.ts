@@ -1,4 +1,4 @@
-import { AMPSServer, AMPSCommand, AMPSQueryOptions } from '../config/amps-config';
+import { AMPSServer, AMPSCommand, AMPSQueryOptions, AMPSTopic } from '../config/amps-config';
 import { AMPSConnectionState, AMPSSubscription } from '../types/amps-types';
 import { APP_CONSTANTS } from '../utils/constants';
 import { Client, Command } from 'amps';
@@ -15,6 +15,8 @@ export class AMPSService {
     isConnected: false,
     isConnecting: false
   };
+  private currentServer: AMPSServer | null = null;
+  private currentMessageFormat: string | null = null;
   private subscriptions: Map<string, AMPSSubscription> = new Map();
   private messageHandlers: Map<string, (message: AMPSMessage) => void> = new Map();
   private reconnectAttempts = 0;
@@ -48,7 +50,26 @@ export class AMPSService {
   }
 
   async connect(server: AMPSServer): Promise<void> {
-    if (this.connectionState.isConnecting || this.connectionState.isConnected) {
+    // Use default json format for backward compatibility
+    return this.connectWithMessageFormat(server, 'json');
+  }
+
+  async connectWithMessageFormat(server: AMPSServer, messageFormat: string): Promise<void> {
+    // Check if we're already connected to the same server with the same message format
+    if (this.connectionState.isConnected &&
+        this.currentServer?.name === server.name &&
+        this.currentMessageFormat === messageFormat) {
+      console.log(`✅ Already connected to ${server.name} with ${messageFormat} format`);
+      return;
+    }
+
+    // Disconnect existing connection if switching servers or message formats
+    if (this.connectionState.isConnected) {
+      console.log(`🔄 Switching connection from ${this.currentMessageFormat} to ${messageFormat} format`);
+      await this.disconnect();
+    }
+
+    if (this.connectionState.isConnecting) {
       return;
     }
 
@@ -62,12 +83,16 @@ export class AMPSService {
       // Create and connect real AMPS client with unique name
       this.client = new Client(this.clientName);
 
+      // Generate dynamic WebSocket URL based on message format
+      const dynamicUrl = server.getWebSocketUrl(messageFormat);
+
       console.log(`🔗 AMPS Browser: Connecting to ${server.name}`);
-      console.log(`📡 Server: ${server.ampsUrl}`);
+      console.log(`📡 Server: ${dynamicUrl}`);
+      console.log(`🎯 Message Format: ${messageFormat}`);
       console.log(`👤 Client Name: ${this.clientName}`);
 
-      // Connect to AMPS server
-      await this.client.connect(server.ampsUrl);
+      // Connect to AMPS server with dynamic URL
+      await this.client.connect(dynamicUrl);
 
       // Log client configuration
       console.log(`✅ AMPS Client connected and ready`);
@@ -78,8 +103,12 @@ export class AMPSService {
         server: server.name
       };
 
+      // Store current connection details
+      this.currentServer = server;
+      this.currentMessageFormat = messageFormat;
+
       this.reconnectAttempts = 0;
-      console.log(`✅ Connected to AMPS server: ${server.name}`);
+      console.log(`✅ Connected to AMPS server: ${server.name} (${messageFormat} format)`);
 
     } catch (error) {
       this.connectionState = {
@@ -87,6 +116,8 @@ export class AMPSService {
         isConnecting: false,
         error: error instanceof Error ? error.message : 'Connection failed'
       };
+      this.currentServer = null;
+      this.currentMessageFormat = null;
       throw error;
     }
   }
@@ -121,6 +152,10 @@ export class AMPSService {
       isConnecting: false
     };
 
+    // Clear connection details
+    this.currentServer = null;
+    this.currentMessageFormat = null;
+
     console.log('Disconnected from AMPS server');
   }
 
@@ -128,10 +163,24 @@ export class AMPSService {
     command: AMPSCommand,
     topic: string,
     options: AMPSQueryOptions = {},
-    messageHandler?: (message: AMPSMessage) => void
+    messageHandler?: (message: AMPSMessage) => void,
+    topicInfo?: AMPSTopic
   ): Promise<string> {
     if (!this.connectionState.isConnected) {
       throw new Error('Not connected to AMPS server');
+    }
+
+    // Check if we need to reconnect with a different message format
+    if (topicInfo && this.currentServer) {
+      const requiredFormat = topicInfo.messageType || 'json';
+      if (this.currentMessageFormat !== requiredFormat) {
+        console.log(`🔄 Dynamic WebSocket Routing: Topic ${topic} requires ${requiredFormat} format`);
+        console.log(`🔄 Current format: ${this.currentMessageFormat} → Required format: ${requiredFormat}`);
+        console.log(`🔄 Switching WebSocket endpoint from /amps/${this.currentMessageFormat} to /amps/${requiredFormat}`);
+        await this.connectWithMessageFormat(this.currentServer, requiredFormat);
+      } else {
+        console.log(`✅ WebSocket format match: Topic ${topic} using ${requiredFormat} format (already connected)`);
+      }
     }
 
     try {
@@ -210,12 +259,12 @@ export class AMPSService {
       // Apply query options
       if (options.filter) {
         // AMPS Filter Syntax (tested and working):
-        // - Use lowercase field names with leading slash: /symbol = 'GSK'
-        // - Multiple values: /symbol IN ('GSK', 'GOOGL')
+        // - Use lowercase field names with leading slash: /symbol = 'APPL'
+        // - Multiple values: /symbol IN ('APPL', 'GOOGL')
         // - Nested fields: /extra/hello BEGINS WITH('wo')
         // - Numeric ranges: /bid > 200 AND /bid < 300
         // - Null checks: /ask IS NOT NULL
-        // - String functions: INSTR_I(/symbol, 'gsk') != 0, LENGTH(/symbol) = 3
+        // - String functions: INSTR_I(/symbol, 'APPL') != 0, LENGTH(/symbol) = 3
         ampsCommand.filter(options.filter);
         console.log(`🔍 Applied filter: ${options.filter}`);
         console.log(`📋 Filter will be applied to topic: ${topic}`);
@@ -229,12 +278,10 @@ export class AMPSService {
         console.log(`📖 Applied bookmark: ${options.bookmark}`);
       }
 
-      // Apply options with default value
-      // Options control record limits (top_n=100), conflation (conflation=3000ms),
-      // out-of-focus handling (oof), and other AMPS command settings
-      const optionsValue = options.options || 'top_n=100';
+      // Apply options with command-specific default values
+      const optionsValue = options.options || this.getDefaultOptionsForCommand(command);
       ampsCommand.options(optionsValue);
-      console.log(`⚙️ Applied options: ${optionsValue}`);
+      console.log(`⚙️ Applied ${command} options: ${optionsValue}`);
 
       // Try to clear any existing subscriptions to avoid conflicts
       try {
@@ -503,6 +550,36 @@ export class AMPSService {
     return { ...this.connectionState };
   }
 
+  getCurrentConnectionInfo(): { server: AMPSServer | null; messageFormat: string | null; url: string | null } {
+    return {
+      server: this.currentServer,
+      messageFormat: this.currentMessageFormat,
+      url: this.currentServer && this.currentMessageFormat
+        ? this.currentServer.getWebSocketUrl(this.currentMessageFormat)
+        : null
+    };
+  }
+
+  /**
+   * Gets the appropriate default options based on command type
+   * @param command AMPS command type
+   * @returns Default options string
+   */
+  private getDefaultOptionsForCommand(command: AMPSCommand): string {
+    // Query (SOW): top_n=100 (first 100 messages for historical queries)
+    if (command === AMPSCommand.QUERY || command.toString() === 'sow') {
+      return 'top_n=100';
+    }
+
+    // Subscribe/Query+Subscribe: tail_n=100 (latest 100 messages for live data)
+    if (command === AMPSCommand.SUBSCRIBE || command === AMPSCommand.QUERY_SUBSCRIBE) {
+      return 'tail_n=100';
+    }
+
+    // Fallback for other commands
+    return 'top_n=100';
+  }
+
   getActiveSubscriptions(): AMPSSubscription[] {
     return Array.from(this.subscriptions.values()).filter(sub => sub.isActive);
   }
@@ -599,7 +676,9 @@ export class AMPSService {
           // Find the server config
           const { AMPS_SERVERS } = await import('../config/amps-config');
           const server = AMPS_SERVERS.find(s => s.name === this.connectionState.server);
-          if (server) {
+          if (server && this.currentMessageFormat) {
+            await this.connectWithMessageFormat(server, this.currentMessageFormat);
+          } else if (server) {
             await this.connect(server);
           }
         } catch (error) {

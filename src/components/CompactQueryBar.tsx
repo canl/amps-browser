@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import {
   Box,
   Card,
-  Divider,
   Stack,
   Collapse,
   TextField,
@@ -67,14 +66,14 @@ interface CompactQueryBarProps {
 // Predefined filter examples for quick access
 const QUICK_FILTERS = {
   SAVED_QUERIES: [
-    '/symbol = \'GSK\'',
-    '/symbol IN (\'GSK\', \'GOOGL\')',
+    '/symbol = \'APPL\'',
+    '/symbol IN (\'APPL\', \'GOOGL\')',
     '/bid > 200 AND /bid < 300',
     '/ask IS NOT NULL'
   ],
   ADVANCED_EXAMPLES: [
     '/extra/hello BEGINS WITH(\'wo\')',     // Nested field with BEGINS WITH
-    'INSTR_I(/symbol, \'gsk\') != 0',       // Case-insensitive string search
+    'INSTR_I(/symbol, \'APPL\') != 0',       // Case-insensitive string search
     'LENGTH(/symbol) = 3',                  // String length function
     '/symbol = \'AAPL\'',                   // Simple equality
     '/price > 100 AND /volume > 1000000',  // Multiple conditions
@@ -198,7 +197,7 @@ export const CompactQueryBar: React.FC<CompactQueryBarProps> = ({
                       }
                       onOptionsChange({ ...queryOptions, filter: e.target.value });
                     }}
-                    placeholder="e.g., /symbol = 'GSK' or /bid > 200 AND /bid < 300"
+                    placeholder="e.g., /symbol = 'APPL' or /bid > 200 AND /bid < 300"
                     disabled={!connectionState.isConnected || executionState.isExecuting}
                     fullWidth
                     error={!!fieldErrors.filter}
@@ -226,14 +225,14 @@ export const CompactQueryBar: React.FC<CompactQueryBarProps> = ({
                       <Button
                         onClick={() => onOptionsChange({ ...queryOptions, filter: QUICK_FILTERS.SAVED_QUERIES[0] })}
                         disabled={!connectionState.isConnected || executionState.isExecuting}
-                        title="/symbol = 'GSK'"
+                        title="/symbol = 'APPL'"
                       >
-                        GSK
+                        APPL
                       </Button>
                       <Button
                         onClick={() => onOptionsChange({ ...queryOptions, filter: QUICK_FILTERS.SAVED_QUERIES[1] })}
                         disabled={!connectionState.isConnected || executionState.isExecuting}
-                        title="/symbol IN ('GSK', 'GOOGL')"
+                        title="/symbol IN ('APPL', 'GOOGL')"
                       >
                         Multi-Symbol
                       </Button>
@@ -312,7 +311,7 @@ export const CompactQueryBar: React.FC<CompactQueryBarProps> = ({
                       }
                       onOptionsChange({ ...queryOptions, options: e.target.value });
                     }}
-                    placeholder="e.g., top_n=500,conflation=3000ms,oof (default: top_n=100)"
+                    placeholder="e.g., top_n=500,conflation=3000ms,oof (default varies by command)"
                     disabled={!connectionState.isConnected || executionState.isExecuting}
                     fullWidth
                     error={!!fieldErrors.options}
@@ -321,7 +320,7 @@ export const CompactQueryBar: React.FC<CompactQueryBarProps> = ({
                         startAdornment: <SettingsIcon sx={{ mr: 1, color: fieldErrors.options ? 'error.main' : 'text.secondary' }} />,
                       }
                     }}
-                    helperText={fieldErrors.options || "Comma-separated list of options. Controls record limits (top_n=100), conflation (conflation=3000ms), and other settings (oof). Defaults to 'top_n=100' if empty."}
+                    helperText={fieldErrors.options || "Comma-separated list of options. Controls record limits, conflation (conflation=3000ms), and other settings (oof). Defaults: Query=top_n=100 (first 100), Subscribe/Query+Subscribe=tail_n=100 (latest 100)."}
                   />
                   </Stack>
 

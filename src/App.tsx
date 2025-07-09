@@ -67,11 +67,27 @@ function AppContent() {
         console.log('💡 Filter set. Now execute a query to test it.');
       };
 
+      (window as any).getConnectionInfo = () => {
+        const service = (window as any).ampsService;
+        if (service && service.getCurrentConnectionInfo) {
+          const info = service.getCurrentConnectionInfo();
+          console.log('🔗 Current AMPS Connection Info:', info);
+          console.log(`📡 WebSocket URL: ${info.url}`);
+          console.log(`🎯 Message Format: ${info.messageFormat}`);
+          console.log(`🖥️ Server: ${info.server?.name}`);
+          return info;
+        } else {
+          console.log('❌ AMPS service not available');
+          return null;
+        }
+      };
+
       return () => {
         delete (window as any).debugAMPSTopic;
         delete (window as any).testMarketData;
         delete (window as any).getAMPSClientName;
         delete (window as any).testFilter;
+        delete (window as any).getConnectionInfo;
       };
     }
   }, [debugTopic, getClientName]);
@@ -122,11 +138,14 @@ function AppContent() {
   const handleExecute = useCallback(async () => {
     if (selectedCommand && selectedTopic) {
       try {
-        await executeCommand(selectedCommand, selectedTopic, queryOptions);
+        // Find the topic information for dynamic WebSocket routing
+        const topicInfo = availableTopics.find(t => t.name === selectedTopic);
+
+        await executeCommand(selectedCommand, selectedTopic, queryOptions, topicInfo);
         addNotification({
           type: 'success',
           title: 'Command Executed',
-          message: `${selectedCommand} command executed successfully on topic ${selectedTopic}`
+          message: `${selectedCommand} command executed successfully on topic ${selectedTopic}${topicInfo ? ` (${topicInfo.messageType} format)` : ''}`
         });
       } catch (error) {
         console.error('Execution failed:', error);
@@ -137,7 +156,7 @@ function AppContent() {
         });
       }
     }
-  }, [selectedCommand, selectedTopic, queryOptions, executeCommand, addNotification]);
+  }, [selectedCommand, selectedTopic, queryOptions, executeCommand, addNotification, availableTopics]);
 
   const handleStop = useCallback(async () => {
     try {

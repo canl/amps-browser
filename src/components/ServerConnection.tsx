@@ -5,6 +5,7 @@ import {
   Button,
   ButtonGroup,
 } from '@mui/material';
+import MonitorHeartIcon from '@mui/icons-material/MonitorHeart';
 import { AMPSServer, AMPS_SERVERS } from '../config/amps-config';
 import { AMPSConnectionState } from '../types/amps-types';
 import { SelectField } from './common/FormField';
@@ -32,19 +33,7 @@ export const ServerConnection: React.FC<ServerConnectionProps> = ({
     }
   };
 
-  const getConnectionText = () => {
-    if (connectionState.error) return 'Connection Failed';
-    if (connectionState.isConnecting) return 'Connecting...';
-    if (connectionState.isConnected) return `Connected to ${connectionState.server}`;
-    return 'Disconnected';
-  };
 
-  const getConnectionColor = () => {
-    if (connectionState.error) return 'error';
-    if (connectionState.isConnecting) return 'warning';
-    if (connectionState.isConnected) return 'success';
-    return 'default';
-  };
 
   const serverOptions = AMPS_SERVERS.map(server => ({
     value: server.name,
@@ -103,6 +92,7 @@ export const ServerConnection: React.FC<ServerConnectionProps> = ({
             href={`http://${selectedServer.host}:${selectedServer.adminPort}`}
             target="_blank"
             rel="noopener noreferrer"
+            startIcon={<MonitorHeartIcon />}
             sx={{ textTransform: 'none' }}
           >
             Admin Panel

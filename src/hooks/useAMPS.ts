@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { AMPSService } from '../services/amps-service';
-import { AMPSServer, AMPSCommand, AMPSQueryOptions } from '../config/amps-config';
+import { AMPSServer, AMPSCommand, AMPSQueryOptions, AMPSTopic } from '../config/amps-config';
 import { AMPSConnectionState, ExecutionState, GridData } from '../types/amps-types';
 
 interface AMPSMessage {
@@ -14,16 +14,6 @@ const recordsMatch = (existingRecord: GridData, newRecord: GridData): boolean =>
   // First check if both records have a 'key' field (SOW key)
   if (existingRecord.key !== undefined && newRecord.key !== undefined) {
     return existingRecord.key === newRecord.key;
-  }
-
-  // Fallback to common key fields for different topic types
-  const commonKeyFields = ['id', 'symbol', 'trade_id', 'account_id', 'order_id'];
-
-  // Try to find a matching key field
-  for (const field of commonKeyFields) {
-    if (existingRecord[field] !== undefined && newRecord[field] !== undefined) {
-      return existingRecord[field] === newRecord[field];
-    }
   }
 
   // If no common key field found, consider records as different
@@ -222,7 +212,8 @@ export const useAMPS = () => {
   const executeCommand = useCallback(async (
     command: AMPSCommand,
     topic: string,
-    options: AMPSQueryOptions = {}
+    options: AMPSQueryOptions = {},
+    topicInfo?: AMPSTopic
   ) => {
     if (!ampsServiceRef.current) {
       throw new Error('AMPS service not initialized');
@@ -275,7 +266,7 @@ export const useAMPS = () => {
                 if (sowData.length === 1) {
                   console.log('🔍 Available fields in first SOW record:', Object.keys(data));
                   console.log('📄 Sample SOW record:', data);
-                  console.log('💡 Filter syntax tip: Use lowercase field names with leading slash, e.g., /symbol = \'GSK\'');
+                  console.log('💡 Filter syntax tip: Use lowercase field names with leading slash, e.g., /symbol = \'APPL\'');
                 }
               }
             } else if (process.env.NODE_ENV === 'development') {
@@ -372,7 +363,8 @@ export const useAMPS = () => {
         command,
         topic,
         options,
-        messageHandler
+        messageHandler,
+        topicInfo
       );
 
       // For subscribe-only commands, keep isExecuting true until user stops

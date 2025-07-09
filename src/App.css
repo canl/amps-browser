@@ -293,6 +293,72 @@
   border-color: #667eea !important;
 }
 
+/* AG Grid Footer/Pagination Dark Theme */
+.ag-theme-quartz-dark .ag-paging-panel {
+  background-color: #1e1e1e !important;
+  border-top: 1px solid #404040 !important;
+  color: #ffffff !important;
+}
+
+.ag-theme-quartz-dark .ag-paging-row-summary-panel {
+  background-color: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+.ag-theme-quartz-dark .ag-paging-page-summary-panel {
+  background-color: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+.ag-theme-quartz-dark .ag-paging-button {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+  border: 1px solid #404040 !important;
+}
+
+.ag-theme-quartz-dark .ag-paging-button:hover {
+  background-color: #333333 !important;
+}
+
+.ag-theme-quartz-dark .ag-paging-button:disabled {
+  background-color: #1a1a1a !important;
+  color: #666666 !important;
+  border-color: #333333 !important;
+}
+
+/* AG Grid Page Size Selector */
+.ag-theme-quartz-dark .ag-paging-page-size {
+  background-color: #1e1e1e !important;
+  color: #ffffff !important;
+}
+
+.ag-theme-quartz-dark .ag-paging-page-size select {
+  background-color: #2d2d2d !important;
+  color: #ffffff !important;
+  border: 1px solid #404040 !important;
+}
+
+.ag-theme-quartz-dark .ag-paging-page-size select:focus {
+  background-color: #333333 !important;
+  border-color: #667eea !important;
+  outline: none !important;
+}
+
+/* AG Grid Status Bar */
+.ag-theme-quartz-dark .ag-status-bar {
+  background-color: #1e1e1e !important;
+  border-top: 1px solid #404040 !important;
+  color: #ffffff !important;
+}
+
+.ag-theme-quartz-dark .ag-status-name-value {
+  color: #ffffff !important;
+}
+
+.ag-theme-quartz-dark .ag-status-name-value-value {
+  color: #cccccc !important;
+}
+
 /* Custom styles for numeric cells */
 .numeric-cell {
   text-align: right;
