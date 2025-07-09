@@ -878,7 +878,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
         paper: {
           sx: {
             backgroundColor: '#1a1a1a',
-            border: '1px solid #FFD700',
+            border: '1px solid #667eea',
             borderRadius: 2,
           }
         }
@@ -886,20 +886,20 @@ export const DataGrid: React.FC<DataGridProps> = ({
     >
       <DialogTitle
         sx={{
-          backgroundColor: '#000000',
-          color: '#FFD700',
+          backgroundColor: '#2d2d2d',
+          color: '#e3f2fd',
           fontFamily: '"Courier New", "Monaco", "Consolas", monospace',
           fontSize: '1rem',
           fontWeight: 700,
           textTransform: 'uppercase',
           letterSpacing: '0.1em',
-          borderBottom: '1px solid #FFD700',
+          borderBottom: '1px solid #667eea',
           display: 'flex',
           alignItems: 'center',
           gap: 1
         }}
       >
-        <DataObjectIcon />
+        <DataObjectIcon sx={{ color: '#667eea' }} />
         Raw JSON Data
       </DialogTitle>
       <DialogContent
@@ -917,7 +917,7 @@ export const DataGrid: React.FC<DataGridProps> = ({
             lineHeight: 1.4,
             margin: 0,
             padding: 2,
-            backgroundColor: '#000000',
+            backgroundColor: '#1e1e1e',
             border: '1px solid #404040',
             borderRadius: 1,
             overflow: 'auto',
@@ -926,22 +926,22 @@ export const DataGrid: React.FC<DataGridProps> = ({
             wordBreak: 'break-word',
             color: '#ffffff',
             '& .json-key': {
-              color: '#FFD700 !important',
+              color: '#81c784 !important',
               fontWeight: 'bold',
             },
             '& .json-string': {
-              color: '#00FFFF !important',
+              color: '#64b5f6 !important',
             },
             '& .json-number': {
-              color: '#00FF00 !important',
+              color: '#ffb74d !important',
               fontWeight: 'bold',
             },
             '& .json-boolean': {
-              color: '#FFA500 !important',
+              color: '#ba68c8 !important',
               fontWeight: 'bold',
             },
             '& .json-null': {
-              color: '#FF0000 !important',
+              color: '#f06292 !important',
               fontWeight: 'bold',
             },
           }}
@@ -952,8 +952,8 @@ export const DataGrid: React.FC<DataGridProps> = ({
       </DialogContent>
       <DialogActions
         sx={{
-          backgroundColor: '#000000',
-          borderTop: '1px solid #FFD700',
+          backgroundColor: '#2d2d2d',
+          borderTop: '1px solid #667eea',
           padding: 2,
         }}
       >
@@ -961,14 +961,14 @@ export const DataGrid: React.FC<DataGridProps> = ({
           onClick={handleCloseViewModal}
           variant="outlined"
           sx={{
-            color: '#FFD700',
-            borderColor: '#FFD700',
+            color: '#90caf9',
+            borderColor: '#90caf9',
             fontFamily: '"Courier New", "Monaco", "Consolas", monospace',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
             '&:hover': {
-              backgroundColor: '#333300',
-              borderColor: '#FFD700',
+              backgroundColor: 'rgba(144, 202, 249, 0.08)',
+              borderColor: '#90caf9',
             },
           }}
         >
@@ -983,14 +983,14 @@ export const DataGrid: React.FC<DataGridProps> = ({
           }}
           variant="contained"
           sx={{
-            backgroundColor: '#2d2d2d',
-            color: '#FFD700',
-            border: '1px solid #FFD700',
+            backgroundColor: '#667eea',
+            color: '#ffffff',
+            border: '1px solid #667eea',
             fontFamily: '"Courier New", "Monaco", "Consolas", monospace',
             textTransform: 'uppercase',
             letterSpacing: '0.1em',
             '&:hover': {
-              backgroundColor: '#333300',
+              backgroundColor: '#5a6fd8',
             },
           }}
         >
