@@ -145,7 +145,6 @@ export const AMPS_SERVERS: AMPSServer[] = [
     tcpPort: 9007,
     websocketPort: 9008,
     adminPort: 8085,
-    ampsUrl: 'ws://amps-prod.company.com:9008/amps/json', // Default
     getWebSocketUrl: (messageFormat: string) =>
       `ws://amps-prod.company.com:9008/amps/${messageFormat}`
   },
@@ -155,7 +154,6 @@ export const AMPS_SERVERS: AMPSServer[] = [
     tcpPort: 9007,
     websocketPort: 9008,
     adminPort: 8085,
-    ampsUrl: 'ws://amps-dev.company.com:9008/amps/json', // Default
     getWebSocketUrl: (messageFormat: string) =>
       `ws://amps-dev.company.com:9008/amps/${messageFormat}`
   }

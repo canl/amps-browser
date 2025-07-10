@@ -4,7 +4,6 @@ export interface AMPSServer {
   tcpPort: number;
   websocketPort: number;
   adminPort: number;
-  ampsUrl: string; // Keep for backward compatibility
   getWebSocketUrl: (messageFormat: string) => string; // Dynamic URL generation
 }
 
@@ -22,7 +21,6 @@ export const AMPS_SERVERS: AMPSServer[] = [
     tcpPort: 9007,
     websocketPort: 9008,
     adminPort: 8085,
-    ampsUrl: "ws://34.68.65.149:9008/amps/json", // Default for backward compatibility
     getWebSocketUrl: (messageFormat: string) => `ws://34.68.65.149:9008/amps/${messageFormat}`
   },
   {
@@ -31,7 +29,6 @@ export const AMPS_SERVERS: AMPSServer[] = [
     tcpPort: 9007,
     websocketPort: 9008,
     adminPort: 8085,
-    ampsUrl: "ws://34.68.65.150:9008/amps/json", // Default for backward compatibility
     getWebSocketUrl: (messageFormat: string) => `ws://34.68.65.150:9008/amps/${messageFormat}`
   }
   // Additional servers can be added here
