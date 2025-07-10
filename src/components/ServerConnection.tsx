@@ -49,7 +49,7 @@ export const ServerConnection: React.FC<ServerConnectionProps> = ({
             value={selectedServer?.name || ''}
             onChange={handleServerChange}
             options={serverOptions}
-            disabled={connectionState.isConnecting}
+            disabled={connectionState.isConnecting || connectionState.isConnected}
             size="medium"
           />
         </Box>
@@ -60,6 +60,7 @@ export const ServerConnection: React.FC<ServerConnectionProps> = ({
             isConnected={connectionState.isConnected}
             isConnecting={connectionState.isConnecting}
             serverName={connectionState.server}
+            serverInfo={selectedServer}
             error={connectionState.error}
             variant="chip"
             size="medium"

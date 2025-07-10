@@ -25,7 +25,7 @@ export const useAMPS = () => {
     isConnected: false,
     isConnecting: false
   });
-  
+
   const [executionState, setExecutionState] = useState<ExecutionState>({
     isExecuting: false,
     activeSubscriptions: []
@@ -125,7 +125,7 @@ export const useAMPS = () => {
           // Only keep isExecuting true for subscription-based commands
           const hasActiveSubscriptions = subscriptions.length > 0;
           const isSubscriptionCommand = currentCommand === AMPSCommand.SUBSCRIBE ||
-                                       currentCommand === AMPSCommand.QUERY_SUBSCRIBE;
+            currentCommand === AMPSCommand.QUERY_SUBSCRIBE;
 
           const shouldKeepExecuting = prev.isExecuting || (hasActiveSubscriptions && isSubscriptionCommand);
 
@@ -176,6 +176,8 @@ export const useAMPS = () => {
         isConnecting: false,
         error: error instanceof Error ? error.message : 'Connection failed'
       });
+      // Re-throw the error so the App component can handle it properly
+      throw error;
     }
   }, []);
 
@@ -213,7 +215,8 @@ export const useAMPS = () => {
     command: AMPSCommand,
     topic: string,
     options: AMPSQueryOptions = {},
-    topicInfo?: AMPSTopic
+    topicInfo?: AMPSTopic,
+    onNotification?: (notification: { type: 'success' | 'error' | 'info' | 'warning'; title: string; message: string }) => void
   ) => {
     if (!ampsServiceRef.current) {
       throw new Error('AMPS service not initialized');
@@ -242,6 +245,7 @@ export const useAMPS = () => {
       }
 
       let sowData: GridData[] = [];
+      let hasShownSuccessNotification = false; // Track if we've shown success notification
 
       const messageHandler = (message: AMPSMessage) => {
         const commandType = message.command;
@@ -290,6 +294,15 @@ export const useAMPS = () => {
                 lastExecuted: new Date()
               }));
 
+              // Show success notification for completed SOW query
+              if (onNotification) {
+                onNotification({
+                  type: 'success',
+                  title: 'Query Completed',
+                  message: `SOW query completed successfully on topic ${topic}. Retrieved ${sowData.length} records.`
+                });
+              }
+
               // Clean up message handler for completed SOW query
               if (ampsServiceRef.current) {
                 // Note: We don't call unsubscribe for SOW queries since they're not tracked as subscriptions
@@ -335,6 +348,24 @@ export const useAMPS = () => {
                   return [...prev, data];
                 }
               });
+
+              // Show success notification on first data received for subscriptions
+              if (!hasShownSuccessNotification && onNotification) {
+                hasShownSuccessNotification = true;
+                if (command === AMPSCommand.SUBSCRIBE) {
+                  onNotification({
+                    type: 'success',
+                    title: 'Subscription Active',
+                    message: `Successfully subscribed to topic ${topic}. Receiving real-time updates.`
+                  });
+                } else if (command === AMPSCommand.QUERY_SUBSCRIBE) {
+                  onNotification({
+                    type: 'success',
+                    title: 'Query + Subscription Active',
+                    message: `Successfully started SOW query and subscription on topic ${topic}.`
+                  });
+                }
+              }
             }
             break;
 
@@ -355,7 +386,23 @@ export const useAMPS = () => {
               isExecuting: false,
               error: errorField === 'general' ? errorMessage : undefined // Only show general errors in execution state
             }));
-            break;
+
+            // Set field-specific errors for UI feedback
+            if (errorField !== 'general') {
+              setFieldErrors(prev => ({
+                ...prev,
+                [errorField]: errorMessage
+              }));
+            }
+
+            // Show error notification for AMPS errors
+            if (onNotification) {
+              onNotification({
+                type: 'error',
+                title: 'AMPS Error',
+                message: errorMessage
+              });
+            }
         }
       };
 
@@ -395,10 +442,10 @@ export const useAMPS = () => {
 
     try {
       const activeSubscriptions = ampsServiceRef.current.getActiveSubscriptions();
-      
+
       // Unsubscribe from all active subscriptions
       await Promise.all(
-        activeSubscriptions.map(sub => 
+        activeSubscriptions.map(sub =>
           ampsServiceRef.current!.unsubscribe(sub.id)
         )
       );

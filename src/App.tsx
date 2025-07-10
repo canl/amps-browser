@@ -141,12 +141,11 @@ function AppContent() {
         // Find the topic information for dynamic WebSocket routing
         const topicInfo = availableTopics.find(t => t.name === selectedTopic);
 
-        await executeCommand(selectedCommand, selectedTopic, queryOptions, topicInfo);
-        addNotification({
-          type: 'success',
-          title: 'Command Executed',
-          message: `${selectedCommand} command executed successfully on topic ${selectedTopic}${topicInfo ? ` (${topicInfo.messageType} format)` : ''}`
-        });
+        await executeCommand(selectedCommand, selectedTopic, queryOptions, topicInfo, addNotification);
+
+        // Don't show immediate success notification - wait for AMPS feedback
+        // The executeCommand will handle notifications based on actual AMPS responses
+
       } catch (error) {
         console.error('Execution failed:', error);
         addNotification({

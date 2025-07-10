@@ -568,12 +568,12 @@ export class AMPSService {
   private getDefaultOptionsForCommand(command: AMPSCommand): string {
     // Query (SOW): top_n=100 (first 100 messages for historical queries)
     if (command === AMPSCommand.QUERY || command.toString() === 'sow') {
-      return 'top_n=100';
+      return 'top_n=500';
     }
 
     // Subscribe/Query+Subscribe: tail_n=100 (latest 100 messages for live data)
     if (command === AMPSCommand.SUBSCRIBE || command === AMPSCommand.QUERY_SUBSCRIBE) {
-      return 'tail_n=100';
+      return 'top_n=250';
     }
 
     // Fallback for other commands

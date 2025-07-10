@@ -14,6 +14,7 @@ import {
   Info as InfoIcon,
 
 } from '@mui/icons-material';
+import { AMPSServer } from '../../config/amps-config';
 
 export type StatusType = 'success' | 'error' | 'warning' | 'info' | 'loading' | 'idle';
 
@@ -151,6 +152,7 @@ export interface ConnectionStatusProps {
   isConnected: boolean;
   isConnecting: boolean;
   serverName?: string;
+  serverInfo?: AMPSServer | null;
   error?: string;
   variant?: 'chip' | 'alert' | 'inline';
   size?: 'small' | 'medium' | 'large';
@@ -160,6 +162,7 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
   isConnected,
   isConnecting,
   serverName,
+  serverInfo,
   error,
   variant = 'chip',
   size = 'medium',
@@ -167,15 +170,25 @@ export const ConnectionStatus: React.FC<ConnectionStatusProps> = ({
   let status: StatusType;
   let message: string;
 
+  // Create detailed server info string
+  const getServerDetails = () => {
+    if (serverInfo) {
+      return `${serverInfo.name} (${serverInfo.host}:${serverInfo.websocketPort})`;
+    }
+    return serverName || 'server';
+  };
+
   if (error) {
     status = 'error';
-    message = `Connection failed: ${error}`;
+    // Avoid duplication if error already starts with "Connection failed"
+    const baseError = error.toLowerCase().startsWith('connection failed') ? error : `Connection failed: ${error}`;
+    message = `${baseError} - ${getServerDetails()}`;
   } else if (isConnecting) {
     status = 'loading';
-    message = `Connecting${serverName ? ` to ${serverName}` : ''}...`;
+    message = `Connecting to ${getServerDetails()}...`;
   } else if (isConnected) {
     status = 'success';
-    message = `Connected${serverName ? ` to ${serverName}` : ''}`;
+    message = `Connected to ${getServerDetails()}`;
   } else {
     status = 'idle';
     message = 'Disconnected';
