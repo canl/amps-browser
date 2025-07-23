@@ -308,6 +308,7 @@ function AppContent() {
                 data={gridData}
                 isLoading={executionState.isExecuting}
                 onClearData={clearData}
+                topicInfo={availableTopics.find(t => t.name === selectedTopic) || null}
               />
             </Box>
           </Box>

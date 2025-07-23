@@ -6,6 +6,8 @@ import { AMPSConnectionState, ExecutionState, GridData } from '../types/amps-typ
 interface AMPSMessage {
   command: string;
   data: any;
+  rawData?: any; // Original raw data before processing
+  sowKey?: string; // SOW key if available
   subId: string;
 }
 
@@ -251,10 +253,6 @@ export const useAMPS = () => {
         const commandType = message.command;
         const data = message.data;
 
-        if (process.env.NODE_ENV === 'development') {
-          console.log(`🔄 Processing AMPS message: ${commandType}`, data);
-        }
-
         switch (commandType) {
           case 'group_begin':
             // Start of SOW data group
@@ -265,16 +263,6 @@ export const useAMPS = () => {
             // SOW record - collect in temporary array
             if (data) {
               sowData.push(data);
-              if (process.env.NODE_ENV === 'development') {
-                // Log available fields for debugging filters (only for first record to avoid spam)
-                if (sowData.length === 1) {
-                  console.log('🔍 Available fields in first SOW record:', Object.keys(data));
-                  console.log('📄 Sample SOW record:', data);
-                  console.log('💡 Filter syntax tip: Use lowercase field names with leading slash, e.g., /symbol = \'APPL\'');
-                }
-              }
-            } else if (process.env.NODE_ENV === 'development') {
-              console.warn('⚠️ SOW message received but data is null/undefined');
             }
             break;
 
@@ -336,15 +324,11 @@ export const useAMPS = () => {
                   // Update existing record
                   const newData = [...prev];
                   newData[existingIndex] = { ...newData[existingIndex], ...data };
-                  if (process.env.NODE_ENV === 'development') {
-                    console.log('📡 Updated existing record:', data);
-                  }
+
                   return newData;
                 } else {
                   // Add new record
-                  if (process.env.NODE_ENV === 'development') {
-                    console.log('📡 Added new record:', data);
-                  }
+
                   return [...prev, data];
                 }
               });

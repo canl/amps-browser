@@ -10,124 +10,172 @@
   --ag-font-family: 'Roboto', 'Helvetica', 'Arial', sans-serif;
 }
 
-/* Custom dark theme based on quartz */
+/* Custom dark theme based on quartz - Enhanced for Accessibility */
 .ag-theme-quartz-dark {
   --ag-font-family: 'Inter', 'Roboto', 'Helvetica', 'Arial', sans-serif !important;
   --ag-font-size: 14px !important;
   --ag-header-height: 40px !important;
   --ag-row-height: 35px !important;
 
-  /* Dark theme colors with !important to override */
-  --ag-background-color: #1e1e1e !important;
-  --ag-header-background-color: #2d2d2d !important;
-  --ag-odd-row-background-color: #252525 !important;
-  --ag-row-hover-color: #333333 !important;
+  /* Enhanced dark theme colors for better accessibility contrast */
+  --ag-background-color: #1a1a1a !important;
+  --ag-header-background-color: #2a2a2a !important;
+  --ag-odd-row-background-color: #222222 !important;
+  --ag-row-hover-color: #404040 !important;
   --ag-row-border-color: #404040 !important;
   --ag-border-color: #404040 !important;
-  --ag-header-column-separator-color: #404040 !important;
-  --ag-foreground-color: #ffffff !important;
-  --ag-secondary-foreground-color: #cccccc !important;
-  --ag-header-foreground-color: #ffffff !important;
-  --ag-disabled-foreground-color: #888888 !important;
-  --ag-input-border-color: #404040 !important;
+  --ag-header-column-separator-color: #555555 !important;
+  --ag-foreground-color: #f0f0f0 !important;
+  --ag-secondary-foreground-color: #d0d0d0 !important;
+  --ag-header-foreground-color: #f0f0f0 !important;
+  --ag-disabled-foreground-color: #999999 !important;
+  --ag-input-border-color: #555555 !important;
   --ag-input-border-color-invalid: #ff6b6b !important;
-  --ag-checkbox-background-color: #2d2d2d !important;
-  --ag-checkbox-border-color: #404040 !important;
+  --ag-checkbox-background-color: #2a2a2a !important;
+  --ag-checkbox-border-color: #555555 !important;
   --ag-checkbox-checked-color: #667eea !important;
-  --ag-range-selection-background-color: rgba(102, 126, 234, 0.2) !important;
+  --ag-range-selection-background-color: rgba(102, 126, 234, 0.25) !important;
   --ag-range-selection-border-color: #667eea !important;
-  --ag-selected-row-background-color: rgba(102, 126, 234, 0.3) !important;
+  --ag-selected-row-background-color: rgba(102, 126, 234, 0.35) !important;
 
-  /* Additional overrides for better dark theme */
-  background-color: #1e1e1e !important;
-  color: #ffffff !important;
+  /* Additional overrides for better dark theme accessibility */
+  background-color: #1a1a1a !important;
+  color: #f0f0f0 !important;
 }
 
 .ag-theme-quartz-dark .ag-header {
-  background-color: #2d2d2d !important;
-  color: #ffffff !important;
-  border-bottom: 1px solid #404040 !important;
+  background-color: #2a2a2a !important;
+  color: #f0f0f0 !important;
+  border-bottom: 1px solid #555555 !important;
+  font-weight: 600 !important;
 }
 
 .ag-theme-quartz-dark .ag-header-cell {
-  background-color: #2d2d2d !important;
-  color: #ffffff !important;
-  border-right: 1px solid #404040 !important;
+  background-color: #2a2a2a !important;
+  color: #f0f0f0 !important;
+  border-right: 1px solid #555555 !important;
+  font-weight: 600 !important;
 }
 
 .ag-theme-quartz-dark .ag-row {
-  background-color: #1e1e1e !important;
-  color: #ffffff !important;
+  background-color: #1a1a1a !important;
+  color: #f0f0f0 !important;
   border-bottom: 1px solid #404040 !important;
 }
 
 .ag-theme-quartz-dark .ag-row-odd {
-  background-color: #252525 !important;
+  background-color: #222222 !important;
 }
 
 .ag-theme-quartz-dark .ag-row:hover {
-  background-color: #333333 !important;
+  background-color: #404040 !important;
+  color: #ffffff !important;
 }
 
 .ag-theme-quartz-dark .ag-cell {
-  color: #ffffff !important;
+  color: #f0f0f0 !important;
   border-right: 1px solid #404040 !important;
 }
 
-/* AG Grid Side Panel Dark Theme */
+/* AG Grid Side Panel Dark Theme - Enhanced Accessibility */
 .ag-theme-quartz-dark .ag-side-panel {
-  background-color: #1e1e1e !important;
+  background-color: #1a1a1a !important;
   border-left: 1px solid #404040 !important;
 }
 
 .ag-theme-quartz-dark .ag-tool-panel-wrapper {
-  background-color: #1e1e1e !important;
+  background-color: #1a1a1a !important;
 }
 
 .ag-theme-quartz-dark .ag-column-tool-panel {
-  background-color: #1e1e1e !important;
-  color: #ffffff !important;
+  background-color: #1a1a1a !important;
+  color: #f5f5f5 !important;
 }
 
 .ag-theme-quartz-dark .ag-filter-tool-panel {
-  background-color: #1e1e1e !important;
-  color: #ffffff !important;
+  background-color: #1a1a1a !important;
+  color: #f5f5f5 !important;
 }
 
+/* Enhanced contrast for sidebar text elements */
 .ag-theme-quartz-dark .ag-column-tool-panel .ag-column-tool-panel-column-group,
 .ag-theme-quartz-dark .ag-column-tool-panel .ag-column-tool-panel-column {
-  color: #ffffff !important;
+  color: #f5f5f5 !important;
+  font-weight: 500 !important;
 }
 
 .ag-theme-quartz-dark .ag-column-tool-panel .ag-column-tool-panel-column:hover {
-  background-color: #333333 !important;
+  background-color: #404040 !important;
+  color: #ffffff !important;
 }
 
 .ag-theme-quartz-dark .ag-filter-tool-panel .ag-filter-tool-panel-header {
-  background-color: #2d2d2d !important;
-  color: #ffffff !important;
+  background-color: #2a2a2a !important;
+  color: #f5f5f5 !important;
   border-bottom: 1px solid #404040 !important;
+  font-weight: 600 !important;
 }
 
 .ag-theme-quartz-dark .ag-filter-tool-panel .ag-filter-tool-panel-instance {
-  background-color: #1e1e1e !important;
-  color: #ffffff !important;
+  background-color: #1a1a1a !important;
+  color: #f5f5f5 !important;
   border-bottom: 1px solid #404040 !important;
 }
 
+/* Enhanced tab contrast */
 .ag-theme-quartz-dark .ag-side-panel .ag-tab {
-  background-color: #2d2d2d !important;
-  color: #ffffff !important;
+  background-color: #2a2a2a !important;
+  color: #f5f5f5 !important;
   border-right: 1px solid #404040 !important;
+  font-weight: 500 !important;
 }
 
 .ag-theme-quartz-dark .ag-side-panel .ag-tab.ag-tab-selected {
-  background-color: #1e1e1e !important;
+  background-color: #1a1a1a !important;
   color: #ffffff !important;
+  font-weight: 600 !important;
 }
 
 .ag-theme-quartz-dark .ag-side-panel .ag-tab:hover {
+  background-color: #404040 !important;
+  color: #ffffff !important;
+}
+
+/* Enhanced contrast for sidebar labels and text */
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-tool-panel-column-label,
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-tool-panel-group-title {
+  color: #f5f5f5 !important;
+  font-weight: 500 !important;
+}
+
+/* Enhanced contrast for checkboxes in sidebar */
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-select-checkbox,
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-group-checkbox {
+  filter: brightness(1.2) contrast(1.1) !important;
+}
+
+/* Enhanced contrast for search input in sidebar */
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-select-header-filter-wrapper input {
+  background-color: #2a2a2a !important;
+  color: #f5f5f5 !important;
+  border: 1px solid #555555 !important;
+  font-weight: 500 !important;
+}
+
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-select-header-filter-wrapper input:focus {
   background-color: #333333 !important;
+  border-color: #667eea !important;
+  color: #ffffff !important;
+}
+
+/* Enhanced contrast for pivot mode toggle */
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-select-header-checkbox {
+  filter: brightness(1.2) contrast(1.1) !important;
+}
+
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-select-header-checkbox-label {
+  color: #f5f5f5 !important;
+  font-weight: 500 !important;
 }
 
 /* AG Grid Menu Dark Theme */
@@ -151,25 +199,26 @@
 
 /* AG Grid Root Container Dark Theme */
 .ag-theme-quartz-dark {
-  background-color: #1e1e1e !important;
+  background-color: #1a1a1a !important;
 }
 
 .ag-theme-quartz-dark .ag-root-wrapper {
-  background-color: #1e1e1e !important;
+  background-color: #1a1a1a !important;
 }
 
 .ag-theme-quartz-dark .ag-root {
-  background-color: #1e1e1e !important;
+  background-color: #1a1a1a !important;
 }
 
 /* AG Grid No Data Overlay */
 .ag-theme-quartz-dark .ag-overlay-no-rows-wrapper {
-  background-color: #1e1e1e !important;
+  background-color: #1a1a1a !important;
 }
 
 .ag-theme-quartz-dark .ag-overlay-no-rows-center {
-  background-color: #1e1e1e !important;
-  color: #ffffff !important;
+  background-color: #1a1a1a !important;
+  color: #f0f0f0 !important;
+  font-weight: 500 !important;
 }
 
 /* AG Grid Filter Inputs Dark Theme - More Specific Selectors */
@@ -363,6 +412,204 @@
 .numeric-cell {
   text-align: right;
   font-variant-numeric: tabular-nums;
+}
+
+/* Additional Accessibility Enhancements for AG Grid Dark Theme */
+
+/* Enhanced contrast for all sidebar text elements to meet WCAG AA standards */
+.ag-theme-quartz-dark .ag-side-panel,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper,
+.ag-theme-quartz-dark .ag-column-tool-panel,
+.ag-theme-quartz-dark .ag-filter-tool-panel {
+  /* Ensure minimum contrast ratio of 4.5:1 for normal text */
+  color: #f0f0f0 !important;
+}
+
+/* Enhanced contrast for interactive elements */
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-tool-panel-column,
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-tool-panel-column-group {
+  color: #f0f0f0 !important;
+  padding: 4px 8px !important;
+  border-radius: 4px !important;
+  transition: all 0.2s ease !important;
+}
+
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-tool-panel-column:hover,
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-tool-panel-column-group:hover {
+  background-color: #404040 !important;
+  color: #ffffff !important;
+}
+
+/* Enhanced focus indicators for accessibility */
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-tool-panel-column:focus,
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-tool-panel-column-group:focus {
+  outline: 2px solid #667eea !important;
+  outline-offset: 2px !important;
+  background-color: #404040 !important;
+  color: #ffffff !important;
+}
+
+/* Enhanced contrast for sidebar icons */
+.ag-theme-quartz-dark .ag-side-panel .ag-icon,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper .ag-icon,
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-icon {
+  filter: brightness(1.3) contrast(1.2) !important;
+  opacity: 0.9 !important;
+}
+
+.ag-theme-quartz-dark .ag-side-panel .ag-icon:hover,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper .ag-icon:hover,
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-icon:hover {
+  filter: brightness(1.5) contrast(1.3) !important;
+  opacity: 1 !important;
+}
+
+/* Enhanced contrast for sidebar buttons and controls */
+.ag-theme-quartz-dark .ag-side-panel button,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper button,
+.ag-theme-quartz-dark .ag-column-tool-panel button {
+  background-color: #2a2a2a !important;
+  color: #f0f0f0 !important;
+  border: 1px solid #555555 !important;
+  font-weight: 500 !important;
+}
+
+.ag-theme-quartz-dark .ag-side-panel button:hover,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper button:hover,
+.ag-theme-quartz-dark .ag-column-tool-panel button:hover {
+  background-color: #404040 !important;
+  color: #ffffff !important;
+  border-color: #667eea !important;
+}
+
+.ag-theme-quartz-dark .ag-side-panel button:focus,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper button:focus,
+.ag-theme-quartz-dark .ag-column-tool-panel button:focus {
+  outline: 2px solid #667eea !important;
+  outline-offset: 2px !important;
+  background-color: #404040 !important;
+  color: #ffffff !important;
+}
+
+/* Enhanced contrast for sidebar headers and titles */
+.ag-theme-quartz-dark .ag-side-panel .ag-panel-title-bar,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper .ag-panel-title-bar {
+  background-color: #2a2a2a !important;
+  color: #f0f0f0 !important;
+  font-weight: 600 !important;
+  border-bottom: 1px solid #555555 !important;
+}
+
+/* Enhanced contrast for sidebar scrollbars */
+.ag-theme-quartz-dark .ag-side-panel::-webkit-scrollbar,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper::-webkit-scrollbar {
+  width: 8px !important;
+  background-color: #1a1a1a !important;
+}
+
+.ag-theme-quartz-dark .ag-side-panel::-webkit-scrollbar-thumb,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper::-webkit-scrollbar-thumb {
+  background-color: #555555 !important;
+  border-radius: 4px !important;
+}
+
+.ag-theme-quartz-dark .ag-side-panel::-webkit-scrollbar-thumb:hover,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper::-webkit-scrollbar-thumb:hover {
+  background-color: #667eea !important;
+}
+
+/* Fix remaining dark text and icon issues in AG Grid sidebar */
+
+/* Row Groups and Values drop zones */
+.ag-theme-quartz-dark .ag-column-drop-vertical .ag-column-drop-empty-message,
+.ag-theme-quartz-dark .ag-column-drop .ag-column-drop-empty-message {
+  color: #d0d0d0 !important;
+  font-style: italic !important;
+  opacity: 0.8 !important;
+}
+
+.ag-theme-quartz-dark .ag-column-drop-vertical,
+.ag-theme-quartz-dark .ag-column-drop {
+  background-color: #1a1a1a !important;
+  border: 1px dashed #555555 !important;
+  color: #d0d0d0 !important;
+}
+
+/* All text elements in sidebar panels */
+.ag-theme-quartz-dark .ag-side-panel *,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper *,
+.ag-theme-quartz-dark .ag-column-tool-panel * {
+  color: #f0f0f0 !important;
+}
+
+/* Specific overrides for drag and drop areas */
+.ag-theme-quartz-dark .ag-column-drop-vertical .ag-column-drop-list,
+.ag-theme-quartz-dark .ag-column-drop .ag-column-drop-list {
+  background-color: #1a1a1a !important;
+}
+
+.ag-theme-quartz-dark .ag-column-drop-vertical .ag-column-drop-cell,
+.ag-theme-quartz-dark .ag-column-drop .ag-column-drop-cell {
+  background-color: #2a2a2a !important;
+  color: #f0f0f0 !important;
+  border: 1px solid #555555 !important;
+}
+
+/* Icons in sidebar - force light colors */
+.ag-theme-quartz-dark .ag-side-panel .ag-icon,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper .ag-icon,
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-icon,
+.ag-theme-quartz-dark .ag-column-drop .ag-icon {
+  filter: invert(1) brightness(0.9) !important;
+}
+
+/* Specific icon overrides */
+.ag-theme-quartz-dark .ag-icon-group,
+.ag-theme-quartz-dark .ag-icon-aggregate,
+.ag-theme-quartz-dark .ag-icon-pivot,
+.ag-theme-quartz-dark .ag-icon-columns,
+.ag-theme-quartz-dark .ag-icon-filter {
+  filter: invert(1) brightness(0.9) !important;
+}
+
+/* Panel titles and headers */
+.ag-theme-quartz-dark .ag-side-panel .ag-panel-title-bar-title,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper .ag-panel-title-bar-title {
+  color: #f0f0f0 !important;
+  font-weight: 600 !important;
+}
+
+/* Search/filter input in columns panel */
+.ag-theme-quartz-dark .ag-column-select-header-filter-wrapper input {
+  background-color: #2a2a2a !important;
+  color: #f0f0f0 !important;
+  border: 1px solid #555555 !important;
+}
+
+.ag-theme-quartz-dark .ag-column-select-header-filter-wrapper input::placeholder {
+  color: #999999 !important;
+}
+
+/* Checkbox labels and text */
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-column-select-checkbox-label,
+.ag-theme-quartz-dark .ag-column-tool-panel .ag-group-checkbox-label {
+  color: #f0f0f0 !important;
+}
+
+/* Pivot mode toggle text */
+.ag-theme-quartz-dark .ag-column-select-header-checkbox-label {
+  color: #f0f0f0 !important;
+  font-weight: 500 !important;
+}
+
+/* Any remaining text elements that might be dark */
+.ag-theme-quartz-dark .ag-side-panel span,
+.ag-theme-quartz-dark .ag-side-panel div,
+.ag-theme-quartz-dark .ag-side-panel label,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper span,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper div,
+.ag-theme-quartz-dark .ag-tool-panel-wrapper label {
+  color: #f0f0f0 !important;
 }
 
 

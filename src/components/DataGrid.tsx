@@ -45,6 +45,8 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import {
   GetApp as ExportIcon,
@@ -94,12 +96,14 @@ interface DataGridProps {
   data: GridData[];
   isLoading?: boolean;
   onClearData?: () => void;
+  topicInfo?: { messageType: string; name: string } | null;
 }
 
 export const DataGrid: React.FC<DataGridProps> = ({
   data,
   isLoading = false,
-  onClearData
+  onClearData,
+  topicInfo = null
 }) => {
   const gridRef = useRef<AgGridReact>(null);
   const gridApiRef = useRef<GridApi | null>(null);
@@ -129,17 +133,53 @@ export const DataGrid: React.FC<DataGridProps> = ({
   // Modal state for viewing raw JSON data
   const [viewModalOpen, setViewModalOpen] = useState(false);
   const [selectedRowData, setSelectedRowData] = useState<GridData | null>(null);
+  const [showParsedView, setShowParsedView] = useState(false); // For NVFIX toggle
 
   // Handler for viewing raw JSON data
   const handleViewRawData = useCallback((rowData: GridData) => {
     setSelectedRowData(rowData);
+
+    // For NVFIX messages, default to raw view; for others, default to parsed view
+    const isNVFIX = topicInfo?.messageType?.toLowerCase() === 'nvfix';
+    setShowParsedView(!isNVFIX);
+
     setViewModalOpen(true);
-  }, []);
+  }, [topicInfo]);
 
   // Handler for closing the view modal
   const handleCloseViewModal = useCallback(() => {
     setViewModalOpen(false);
     setSelectedRowData(null);
+    setShowParsedView(false);
+  }, []);
+
+  // Function to parse NVFIX messages into structured objects
+  const parseNVFIXMessage = useCallback((nvfixString: string): Record<string, any> => {
+    if (typeof nvfixString !== 'string') {
+      return { error: 'Invalid NVFIX format', original: nvfixString };
+    }
+
+    const result: Record<string, any> = {};
+
+    // Split by & delimiter and parse key=value pairs
+    const pairs = nvfixString.split('&');
+
+    for (const pair of pairs) {
+      const equalIndex = pair.indexOf('=');
+      if (equalIndex > 0) {
+        const key = pair.substring(0, equalIndex).trim();
+        const value = pair.substring(equalIndex + 1).trim();
+
+        // Try to convert numeric values
+        if (/^\d+(\.\d+)?$/.test(value)) {
+          result[key] = parseFloat(value);
+        } else {
+          result[key] = value;
+        }
+      }
+    }
+
+    return result;
   }, []);
 
   // Function to format JSON with syntax highlighting
@@ -896,11 +936,46 @@ export const DataGrid: React.FC<DataGridProps> = ({
           borderBottom: '1px solid #667eea',
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'space-between',
           gap: 1
         }}
       >
-        <DataObjectIcon sx={{ color: '#667eea' }} />
-        Raw JSON Data
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <DataObjectIcon sx={{ color: '#667eea' }} />
+          {topicInfo?.messageType?.toLowerCase() === 'nvfix'
+            ? (showParsedView ? 'Parsed NVFIX Data' : 'Raw NVFIX Data')
+            : 'Raw JSON Data'
+          }
+        </Box>
+
+        {/* Toggle for NVFIX messages */}
+        {topicInfo?.messageType?.toLowerCase() === 'nvfix' && (
+          <ToggleButtonGroup
+            value={showParsedView ? 'parsed' : 'raw'}
+            exclusive
+            onChange={(_, newValue) => {
+              if (newValue !== null) {
+                setShowParsedView(newValue === 'parsed');
+              }
+            }}
+            size="small"
+            sx={{
+              '& .MuiToggleButton-root': {
+                color: '#90caf9',
+                borderColor: '#667eea',
+                fontSize: '0.75rem',
+                padding: '4px 8px',
+                '&.Mui-selected': {
+                  backgroundColor: '#667eea',
+                  color: '#ffffff',
+                },
+              },
+            }}
+          >
+            <ToggleButton value="raw">Raw</ToggleButton>
+            <ToggleButton value="parsed">Parsed</ToggleButton>
+          </ToggleButtonGroup>
+        )}
       </DialogTitle>
       <DialogContent
         sx={{
@@ -946,7 +1021,38 @@ export const DataGrid: React.FC<DataGridProps> = ({
             },
           }}
           dangerouslySetInnerHTML={{
-            __html: selectedRowData ? formatJsonWithHighlighting(selectedRowData) : ''
+            __html: (() => {
+              if (!selectedRowData) return '';
+
+              const isNVFIX = topicInfo?.messageType?.toLowerCase() === 'nvfix';
+
+              if (isNVFIX) {
+                // Extract NVFIX string from the selected row data
+                // The NVFIX string is in the first field (excluding 'key')
+                const dataKeys = Object.keys(selectedRowData).filter(key => key !== 'key');
+                const firstKey = dataKeys[0];
+                const nvfixString = firstKey && selectedRowData[firstKey] && typeof selectedRowData[firstKey] === 'string' && selectedRowData[firstKey].includes('&')
+                  ? `${firstKey}=${selectedRowData[firstKey]}`
+                  : '';
+
+                if (showParsedView) {
+                  // Show parsed NVFIX data
+                  const parsedData = parseNVFIXMessage(nvfixString);
+                  return formatJsonWithHighlighting(parsedData);
+                } else {
+                  // Show raw NVFIX string in the correct format
+                  const rawDisplay = {
+                    messageType: 'nvfix',
+                    data: nvfixString,
+                    sowKey: selectedRowData.key || 'N/A'
+                  };
+                  return formatJsonWithHighlighting(rawDisplay);
+                }
+              } else {
+                // For non-NVFIX messages, show the parsed data
+                return formatJsonWithHighlighting(selectedRowData);
+              }
+            })()
           }}
         />
       </DialogContent>

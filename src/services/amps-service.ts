@@ -6,6 +6,8 @@ import { Client, Command } from 'amps';
 interface AMPSMessage {
   command: string;
   data: any;
+  rawData?: any; // Original raw data before processing
+  sowKey?: string; // SOW key if available
   subId: string;
 }
 
@@ -295,43 +297,61 @@ export class AMPSService {
       // Execute the command with message handler (EXACT copy of working debug pattern)
       console.log(`🔄 Executing AMPS command with EXACT debug pattern...`);
       const subId = await this.client.execute(ampsCommand, (message: any) => {
-        // Use EXACTLY the same handler as the working debug function
-        console.log(`🎯 Test message received for ${topic}:`, message);
-
-        // Process the message directly like the debug function
+        // Process SOW messages directly for better data extraction
         if (message.c === 'sow' && messageHandler) {
-          console.log(`📄 Direct SOW processing:`, message);
 
           // Extract data the same way as debug
           let data = null;
 
-          console.log(`🔍 Data extraction attempt:`, {
-            hasDataFunction: typeof message.data === 'function',
-            dataType: typeof message.data,
-            messageKeys: Object.keys(message),
-            rawData: message.data
-          });
+
 
           if (typeof message.data === 'function') {
             try {
               data = message.data();
-              console.log(`✅ SOW data extracted:`, data);
             } catch (error) {
-              console.error(`❌ Error extracting data:`, error);
+              console.error(`Error extracting SOW data:`, error);
             }
           } else if (message.data && typeof message.data === 'object') {
-            // Try direct data access
             data = message.data;
-            console.log(`✅ SOW data (direct):`, data);
-          } else {
-            console.warn(`⚠️ No data found in SOW message:`, message);
           }
 
           if (data) {
-            // Send directly to message handler
+            // Extract SOW key if available
+            let sowKey = null;
+            if (message.header && message.header.sowKey && message.header.sowKey()) {
+              sowKey = message.header.sowKey();
+              // Add SOW key to data for backward compatibility
+              if (data && typeof data === 'object') {
+                data.key = sowKey;
+              }
+            }
+
+            // Try to capture raw NVFIX data for SOW messages
+            let rawNVFIXString = null;
+
+            // Try to extract raw NVFIX string from payload or reconstruct from parsed data
+            if (typeof message.payload === 'function') {
+              try {
+                rawNVFIXString = message.payload();
+              } catch (error) {
+                console.error(`Error extracting SOW payload:`, error);
+              }
+            }
+
+            // If no raw string found, try to reconstruct NVFIX from parsed data
+            if (!rawNVFIXString && data && typeof data === 'object') {
+              const firstKey = Object.keys(data).find(key => key !== 'key'); // Exclude the SOW key
+              if (firstKey && typeof data[firstKey] === 'string' && data[firstKey].includes('&')) {
+                rawNVFIXString = `${firstKey}=${data[firstKey]}`;
+              }
+            }
+
+            // Send to message handler with raw NVFIX data
             messageHandler({
               command: 'sow',
               data: data,
+              rawData: rawNVFIXString || data,
+              sowKey: sowKey,
               subId: subscriptionId
             });
           }
@@ -391,44 +411,67 @@ export class AMPSService {
     try {
       const commandType = message.header ? message.header.command() : message.c;
       let data = null;
+      let rawData = null;
 
-      // For SOW messages, the data is typically accessed via message.data() function
-      if (message.c === 'sow' && typeof message.data === 'function') {
+
+
+      // Extract raw NVFIX data and processed data
+      let rawNVFIXString = null;
+
+      // Try to get raw data from payload function
+      if (typeof message.payload === 'function') {
         try {
-          data = message.data();
-          console.log(`📄 SOW data extracted:`, data);
+          rawNVFIXString = message.payload();
         } catch (error) {
-          console.error(`❌ Error extracting SOW data:`, error);
+          console.error(`Error extracting payload:`, error);
         }
       }
 
-      // Fallback data extraction methods
-      if (!data) {
-        if (message.data && typeof message.data === 'object') {
-          data = message.data;
-        } else if (message.d) {
-          data = message.d;
+      // Extract processed data
+      if (typeof message.data === 'function') {
+        try {
+          const dataResult = message.data();
+          if (typeof dataResult === 'string') {
+            rawNVFIXString = dataResult;
+          }
+          data = dataResult;
+        } catch (error) {
+          console.error(`Error extracting data:`, error);
+        }
+      } else if (message.data && typeof message.data === 'object') {
+        data = message.data;
+      } else if (message.d) {
+        data = message.d;
+      }
+
+      // If no raw string found, try to reconstruct NVFIX from parsed data
+      if (!rawNVFIXString && data && typeof data === 'object') {
+        const firstKey = Object.keys(data).find(key => key !== 'key'); // Exclude SOW key
+        if (firstKey && typeof data[firstKey] === 'string' && data[firstKey].includes('&')) {
+          rawNVFIXString = `${firstKey}=${data[firstKey]}`;
         }
       }
 
-      console.log(`🔍 Message processing:`, {
-        commandType,
-        hasData: !!data,
-        dataType: typeof data,
-        messageType: message.c,
-        topic: message.t,
-        gseq: message.gseq
-      });
+      rawData = rawNVFIXString || data;
 
-      // Add SOW key to data if available
-      if (data && message.header && message.header.sowKey && message.header.sowKey()) {
-        data.key = message.header.sowKey();
+
+
+      // Extract SOW key if available
+      let sowKey = null;
+      if (message.header && message.header.sowKey && message.header.sowKey()) {
+        sowKey = message.header.sowKey();
+        // Add SOW key to data for backward compatibility
+        if (data && typeof data === 'object') {
+          data.key = sowKey;
+        }
       }
 
       // Convert AMPS message to our internal format
       const internalMessage: AMPSMessage = {
         command: commandType,
         data: data,
+        rawData: rawData,
+        sowKey: sowKey,
         subId: subscriptionId
       };
 
